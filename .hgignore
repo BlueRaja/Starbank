@@ -1,0 +1,8 @@
+syntax: regexp
+/bin/
+/obj/
+\.user$
+\.suo$
+^_ReSharper\..*
+\.testsettings$
+\.vsmdi$
