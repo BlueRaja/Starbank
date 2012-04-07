@@ -6,3 +6,5 @@ syntax: regexp
 ^_ReSharper\..*
 \.testsettings$
 \.vsmdi$
+syntax: glob
+Starbank Setup/Debug/*

@@ -34,6 +34,8 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.btnOk = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -69,22 +71,22 @@
             this.label4.AutoSize = true;
             this.label4.Location = new System.Drawing.Point(19, 90);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(194, 13);
+            this.label4.Size = new System.Drawing.Size(256, 13);
             this.label4.TabIndex = 3;
-            this.label4.Text = "Special thanks to ponsfonze, pandizzle,";
+            this.label4.Text = "Special thanks to zezula.net for creating StormLib.dll;";
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(19, 103);
+            this.label5.Location = new System.Drawing.Point(20, 120);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(138, 13);
+            this.label5.Size = new System.Drawing.Size(163, 13);
             this.label5.TabIndex = 4;
-            this.label5.Text = "and Messiah.Roy for testing";
+            this.label5.Text = "and to ponsfonze, pandizzle, and";
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(193, 114);
+            this.btnOk.Location = new System.Drawing.Point(193, 151);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 5;
@@ -92,12 +94,32 @@
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(19, 105);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(213, 13);
+            this.label6.TabIndex = 6;
+            this.label6.Text = "Mr Nukealizer for his bank-signing program; ";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(20, 137);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(117, 13);
+            this.label7.TabIndex = 7;
+            this.label7.Text = "Messiah.Roy for testing";
+            // 
             // AboutBox
             // 
             this.AcceptButton = this.btnOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(280, 149);
+            this.ClientSize = new System.Drawing.Size(280, 186);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label5);
@@ -120,5 +142,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button btnOk;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
     }
 }

@@ -81,6 +81,13 @@ namespace StarBank.Properties {
             }
         }
         
+        internal static System.Drawing.Icon StarBankIcon {
+            get {
+                object obj = ResourceManager.GetObject("StarBankIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
         internal static byte[] Triggers {
             get {
                 object obj = ResourceManager.GetObject("Triggers", resourceCulture);
