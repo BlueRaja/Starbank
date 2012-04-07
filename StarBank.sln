@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectListView2010", "ObjectListView\ObjectListView2010.csproj", "{18FEDA0C-D147-4286-B39A-01204808106A}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Starbank Setup", "Starbank Setup\Starbank Setup.vdproj", "{E93EA8E5-94D5-4949-B90A-466D92538729}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = StarHack II.vsmdi
@@ -45,6 +47,12 @@ Global
 		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{18FEDA0C-D147-4286-B39A-01204808106A}.Release|x86.ActiveCfg = Release|Any CPU
+		{E93EA8E5-94D5-4949-B90A-466D92538729}.Debug|Any CPU.ActiveCfg = Debug
+		{E93EA8E5-94D5-4949-B90A-466D92538729}.Debug|Mixed Platforms.ActiveCfg = Debug
+		{E93EA8E5-94D5-4949-B90A-466D92538729}.Debug|x86.ActiveCfg = Debug
+		{E93EA8E5-94D5-4949-B90A-466D92538729}.Release|Any CPU.ActiveCfg = Release
+		{E93EA8E5-94D5-4949-B90A-466D92538729}.Release|Mixed Platforms.ActiveCfg = Release
+		{E93EA8E5-94D5-4949-B90A-466D92538729}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
