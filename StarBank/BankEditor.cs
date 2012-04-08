@@ -135,19 +135,32 @@ namespace StarBank
             NewSectionForm newSectionForm = new NewSectionForm();
             if (newSectionForm.ShowDialog() == DialogResult.OK)
             {
-                Bank.Section section = new Bank.Section {Name = newSectionForm.Text};
+                Bank.Section section = new Bank.Section {Name = newSectionForm.SectionName};
                 _bank.Sections.Add(section);
                 SaveBank();
+                RefreshBankProperties();
             }
         }
 
         private void addNewItemToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //NewSectionForm newSectionForm = new NewSectionForm("Enter name of new item", "Enter item name");
-            NewSectionForm newSectionForm = new NewSectionForm();
-            if(newSectionForm.ShowDialog() == DialogResult.OK)
+            NewSectionItemForm newSectionItemForm = new NewSectionItemForm(_bank);
+
+            Bank.Key selectedKey = GetSelectedKey();
+            if(selectedKey != null)
+                newSectionItemForm.Section = selectedKey.Section;
+
+            if(newSectionItemForm.ShowDialog() == DialogResult.OK)
             {
-                //TODO: Create a new item
+                Bank.Section selectedSection = newSectionItemForm.Section;
+                Bank.Key bankKey = new Bank_Stuffs.Bank.Key();
+                bankKey.Name = newSectionItemForm.ItemName;
+                bankKey.Section = selectedSection;
+                bankKey.Type = "string";
+                bankKey.Value = "";
+                selectedSection.Keys.Add(bankKey);
+                SaveBank();
+                RefreshBankProperties();
             }
         }
 
@@ -155,6 +168,30 @@ namespace StarBank
         {
             objectListView1.EditSubItem(objectListView1.SelectedItem, 0);
         }
+
+        private void deleteItemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show("Are you sure you want to delete this item?", "Delete item", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            if(result == DialogResult.OK)
+            {
+                Bank.Key selectedKey = GetSelectedKey();
+                selectedKey.Section.Keys.Remove(selectedKey);
+                SaveBank();
+                RefreshBankProperties();
+            }
+        }
+
+        private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+        {
+            if(_bank == null)
+                e.Cancel = true;
+            deleteItemToolStripMenuItem.Enabled = (GetSelectedKey() != null);
+        }
         #endregion
+
+        private Bank.Key GetSelectedKey()
+        {
+            return (objectListView1.SelectedObject as Bank.Key);
+        }
     }
 }

@@ -64,6 +64,7 @@
             this.btnOk.TabIndex = 2;
             this.btnOk.Text = "Ok";
             this.btnOk.UseVisualStyleBackColor = true;
+            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnCancel
             // 
@@ -77,6 +78,7 @@
             // 
             // cmbSections
             // 
+            this.cmbSections.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbSections.FormattingEnabled = true;
             this.cmbSections.Location = new System.Drawing.Point(81, 70);
             this.cmbSections.Name = "cmbSections";
@@ -121,7 +123,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "NewSectionItemForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Enter Section Name";
+            this.Text = "Add new Item";
             this.ResumeLayout(false);
             this.PerformLayout();
 

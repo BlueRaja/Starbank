@@ -25,5 +25,10 @@ namespace StarBank
         {
             btnOk.Enabled = (!String.IsNullOrEmpty(textBox1.Text));
         }
+
+        private void btnOk_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+        }
     }
 }

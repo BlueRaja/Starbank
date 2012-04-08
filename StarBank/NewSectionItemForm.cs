@@ -26,6 +26,7 @@ namespace StarBank
         public Bank.Section Section
         {
             get { return (Bank.Section) cmbSections.SelectedItem; }
+            set { cmbSections.SelectedItem = value; }
         }
 
         private void cmbSections_Format(object sender, ListControlConvertEventArgs e)
@@ -50,5 +51,10 @@ namespace StarBank
             btnOk.Enabled = (cmbSections.SelectedItem != null && !String.IsNullOrEmpty(txtName.Text));
         }
         #endregion
+
+        private void btnOk_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+        }
     }
 }
