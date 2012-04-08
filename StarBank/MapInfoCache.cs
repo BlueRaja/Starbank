@@ -30,6 +30,11 @@ namespace StarBank
             SortedList<string, MapInfo> mapList = new SortedList<string, MapInfo>();
             DirectoryInfo cacheFolder = new DirectoryInfo(CACHE_FOLDER);
             IEnumerable<FileInfo> mapFiles = cacheFolder.GetFiles("*.s2ma", SearchOption.AllDirectories);
+
+            //Hack: Some maps galaxy-script files seem to be misformed.  Until I find out what those
+            //are, I'm going to display a list of them to the user and ask them to contact me.
+            List<string> malformedMaps = new List<string>();
+
             foreach (FileInfo file in mapFiles)
             {
                 //Hack:  The map-name and author name are listed as comments in the galaxy-script file
@@ -40,13 +45,32 @@ namespace StarBank
                 //be multiple with the same name...)
                 string galaxyScriptCode = GetGalaxyScriptCode(file);
                 string[] lines = galaxyScriptCode.Split('\n');
-                if (lines.Length >= 5)
+                if(lines.Length >= 5)
                 {
                     MapInfo mapInfo = new MapInfo();
                     mapInfo.CachePath = file.FullName;
                     mapInfo.DateCreated = file.LastWriteTime;
+                    if(lines[4].Length < 10)
+                    {
+                        malformedMaps.Add(mapInfo.CachePath);
+                        continue;
+                    }
                     mapInfo.Name = lines[4].Substring(10).Trim();
-                    mapInfo.AuthorName = (lines.Length >= 6 ? lines[5].Substring(10).Trim() : "(Unknown)");
+                    if(lines.Length >= 6)
+                    {
+                        if(lines[5].Length < 10)
+                        {
+                            malformedMaps.Add(mapInfo.Name);
+                        }
+                        else
+                        {
+                            mapInfo.AuthorName = lines[5].Substring(10).Trim();
+                        }
+                    }
+                    else
+                    {
+                        mapInfo.AuthorName = "(Unknown)";
+                    }
 
                     bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
                     if(mapAdded)
@@ -57,6 +81,8 @@ namespace StarBank
                     }
                 }
             }
+
+            DisplayMalformedMaps(malformedMaps);
             return mapList.Values;
         }
 
@@ -81,7 +107,7 @@ namespace StarBank
             //both map-name and author-name.  Just concatenate them with an "@" symbol or something.
             string key = mapInfo.Name + "@" + mapInfo.AuthorName;
 
-            if (mapList.ContainsKey(key))
+            if(mapList.ContainsKey(key))
             {
                 MapInfo potentialDuplicate = mapList[key];
                 if (potentialDuplicate.DateCreated >= mapInfo.DateCreated)
@@ -99,6 +125,15 @@ namespace StarBank
             {
                 mapArchive.ExtractFile("MapScript.galaxy", extractToPath);
             }
+        }
+
+        private void DisplayMalformedMaps(IEnumerable<string> malformedMaps)
+        {
+            if(malformedMaps.Count() == 0)
+                return;
+
+            string malformedMapsString = String.Join("\n", malformedMaps);
+            MessageBox.Show("The following maps are malformed:\n\n" + malformedMapsString + "\n\nPlease contact me to let me know and I'll try to fix this error.");
         }
     }
 }
