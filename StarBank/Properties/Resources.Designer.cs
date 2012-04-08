@@ -81,9 +81,9 @@ namespace StarBank.Properties {
             }
         }
         
-        internal static System.Drawing.Icon StarBankIcon {
+        internal static System.Drawing.Icon StarBank {
             get {
-                object obj = ResourceManager.GetObject("StarBankIcon", resourceCulture);
+                object obj = ResourceManager.GetObject("StarBank", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
