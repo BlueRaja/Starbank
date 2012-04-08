@@ -40,6 +40,7 @@ namespace StarBank
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.addNewItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.renameItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.deleteItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.objectListView1)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -96,9 +97,11 @@ namespace StarBank
             this.addNewSectionToolStripMenuItem,
             this.toolStripSeparator1,
             this.addNewItemToolStripMenuItem,
-            this.renameItemToolStripMenuItem});
+            this.renameItemToolStripMenuItem,
+            this.deleteItemToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(163, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(163, 120);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             // 
             // addNewSectionToolStripMenuItem
             // 
@@ -126,6 +129,13 @@ namespace StarBank
             this.renameItemToolStripMenuItem.Text = "Rename item";
             this.renameItemToolStripMenuItem.Click += new System.EventHandler(this.renameItemToolStripMenuItem_Click);
             // 
+            // deleteItemToolStripMenuItem
+            // 
+            this.deleteItemToolStripMenuItem.Name = "deleteItemToolStripMenuItem";
+            this.deleteItemToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.deleteItemToolStripMenuItem.Text = "Delete item";
+            this.deleteItemToolStripMenuItem.Click += new System.EventHandler(this.deleteItemToolStripMenuItem_Click);
+            // 
             // BankEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -150,5 +160,6 @@ namespace StarBank
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem addNewItemToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem renameItemToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem deleteItemToolStripMenuItem;
     }
 }
