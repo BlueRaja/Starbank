@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using StarBank.Bank_Stuffs;
+using System.Text.RegularExpressions;
 
 namespace StarBank
 {
@@ -12,6 +13,9 @@ namespace StarBank
     {
         private readonly string CACHE_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
                                                     @"Blizzard Entertainment\Battle.net\Cache");
+
+        //Regex to find the map-name within the DocumentHeader file
+        private readonly Regex MAP_NAME_REGEX = new Regex("DocInfo/Name.....\x00(.+?)\x15\x00");
 
         private readonly BankInfoCache _bankInfoCache;
 
@@ -31,59 +35,71 @@ namespace StarBank
             DirectoryInfo cacheFolder = new DirectoryInfo(CACHE_FOLDER);
             IEnumerable<FileInfo> mapFiles = cacheFolder.GetFiles("*.s2ma", SearchOption.AllDirectories);
 
-            //Hack: Some maps galaxy-script files seem to be misformed.  Until I find out what those
-            //are, I'm going to display a list of them to the user and ask them to contact me.
-            List<string> malformedMaps = new List<string>();
-
             foreach (FileInfo file in mapFiles)
             {
-                //Hack:  The map-name and author name are listed as comments in the galaxy-script file
-                //Open that file, find the comments, and read them
-
-                //Hack:  Also using the galaxy-script file to determine the name of the bank file.
-                //Based on that name, we GUESS which bank file is the correct one (there could
-                //be multiple with the same name...)
                 string galaxyScriptCode = GetGalaxyScriptCode(file);
-                string[] lines = galaxyScriptCode.Split('\n');
-                if(lines.Length >= 5)
-                {
-                    MapInfo mapInfo = new MapInfo();
-                    mapInfo.CachePath = file.FullName;
-                    mapInfo.DateCreated = file.LastWriteTime;
-                    if(lines[4].Length < 10)
-                    {
-                        malformedMaps.Add(mapInfo.CachePath);
-                        continue;
-                    }
-                    mapInfo.Name = lines[4].Substring(10).Trim();
-                    if(lines.Length >= 6)
-                    {
-                        if(lines[5].Length < 10)
-                        {
-                            malformedMaps.Add(mapInfo.Name);
-                        }
-                        else
-                        {
-                            mapInfo.AuthorName = lines[5].Substring(10).Trim();
-                        }
-                    }
-                    else
-                    {
-                        mapInfo.AuthorName = "(Unknown)";
-                    }
+                MapInfo mapInfo = GetMapInfo(file, galaxyScriptCode);
+                if(mapInfo == null)
+                    continue;
 
-                    bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
-                    if(mapAdded)
-                    {
-                        //Only do other expensive stuff if map was not a duplicate
-                        mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
-                        mapInfo.BankInfos = _bankInfoCache.GetBanksFromCode(galaxyScriptCode);
-                    }
+                bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
+                if(mapAdded)
+                {
+                    //Only do other expensive stuff if map was not a duplicate
+                    mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
+
+                    //Use the galaxyscript-code we already loaded to find the bank-names
+                    //(See GetBanksFromCode() for more info)
+                    mapInfo.BankInfos = _bankInfoCache.GetBanksFromCode(galaxyScriptCode);
                 }
             }
 
-            DisplayMalformedMaps(malformedMaps);
             return mapList.Values;
+        }
+
+        /// <summary>
+        /// Returns a MapInfo object representing the given map.  Tries to grab the info from the GalaxyScript file if possible;
+        /// otherwise attempts to read it from the DocumentHeader file.
+        /// 
+        /// MapInfo.IsProtected and MapInfo.BankInfos are not set here, because they are more expensive to compute, but not
+        /// always necessary
+        /// </summary>
+        private MapInfo GetMapInfo(FileInfo file, string galaxyScriptCode)
+        {
+            string[] lines = galaxyScriptCode.Split('\n');
+            if(lines.Length < 6 || !lines[4].StartsWith("// Name:"))
+            {
+                return GetMapInfoFromDocumentHeader(file);
+            }
+
+            //Hack:  The map-name and author name are listed as comments in the galaxy-script file
+            //Open that file, find the comments, and read them
+            MapInfo mapInfo = new MapInfo();
+            mapInfo.CachePath = file.FullName;
+            mapInfo.DateCreated = file.LastWriteTime;
+            mapInfo.Name = lines[4].Substring(10).Trim();
+            mapInfo.AuthorName = (lines[5].StartsWith("// Author:") ? lines[5].Substring(10).Trim() : "(Unknown)");
+            return mapInfo;
+        }
+
+        /// <summary>
+        /// We can't always rely on the Galaxyscript code for the information we need; some maps remove it.
+        /// In those cases, we need to try to parse it from the less reliable DocumentHeader file
+        /// </summary>
+        private MapInfo GetMapInfoFromDocumentHeader(FileInfo file)
+        {
+            string documentHeader = GetDocumentHeader(file);
+
+            Match match = MAP_NAME_REGEX.Match(documentHeader);
+            if(!match.Success)
+                return null;
+
+            MapInfo mapInfo = new MapInfo();
+            mapInfo.CachePath = file.FullName;
+            mapInfo.DateCreated = file.LastWriteTime;
+            mapInfo.Name = match.Groups[1].Value;
+            mapInfo.AuthorName = "(Unknown)";
+            return mapInfo;
         }
 
         private string GetGalaxyScriptCode(FileInfo mpqFile)
@@ -93,6 +109,17 @@ namespace StarBank
                 using (StormLibWrapper.MpqInternalFile galaxyScriptFile = archive.OpenFile("MapScript.galaxy"))
                 {
                     return galaxyScriptFile.ReadFile();
+                }
+            }
+        }
+
+        private string GetDocumentHeader(FileInfo mpqFile)
+        {
+            using(StormLibWrapper.MpqArchive archive = new StormLibWrapper.MpqArchive(mpqFile.FullName))
+            {
+                using(StormLibWrapper.MpqInternalFile documentHeaderFile = archive.OpenFile("DocumentHeader"))
+                {
+                    return documentHeaderFile.ReadFile();
                 }
             }
         }
@@ -125,15 +152,6 @@ namespace StarBank
             {
                 mapArchive.ExtractFile("MapScript.galaxy", extractToPath);
             }
-        }
-
-        private void DisplayMalformedMaps(IEnumerable<string> malformedMaps)
-        {
-            if(malformedMaps.Count() == 0)
-                return;
-
-            string malformedMapsString = String.Join("\n", malformedMaps);
-            MessageBox.Show("The following maps are malformed:\n\n" + malformedMapsString + "\n\nPlease contact me to let me know and I'll try to fix this error.");
         }
     }
 }
