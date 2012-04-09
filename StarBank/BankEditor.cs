@@ -27,7 +27,18 @@ namespace StarBank
 
         private void RefreshBankProperties()
         {
-            objectListView1.SetObjects(_bank.Sections.SelectMany(o => o.Keys));
+            if(_bank == null)
+            {
+                objectListView1.SetObjects(null);
+                objectListView1.Enabled = false;
+                contextMenuStrip1.Enabled = false;
+            }
+            else
+            {
+                objectListView1.SetObjects(_bank.Sections.SelectMany(o => o.Keys));
+                objectListView1.Enabled = true;
+                contextMenuStrip1.Enabled = true;
+            }
         }
 
         public BankEditor()

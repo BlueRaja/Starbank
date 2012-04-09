@@ -64,7 +64,7 @@ namespace StarBank
             //the ListView gets the BankInfo from
             cmbBankFile.Items.Clear();
             cmbBankFile.Items.AddRange(_selectedMap.BankInfos.OrderBy(o => o.Name).ToArray());
-            cmbBankFile.SelectedItem = _selectedMap.BankInfos.First();
+            cmbBankFile.SelectedItem = _selectedMap.BankInfos.FirstOrDefault();
         }
 
         private void RefreshBankListView()
