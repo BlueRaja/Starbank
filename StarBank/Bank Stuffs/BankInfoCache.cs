@@ -79,6 +79,8 @@ namespace StarBank.Bank_Stuffs
         /// </exception>
         public IEnumerable<BankInfo> GetBanksFromCode(string galaxyScriptCode)
         {
+            //We guess the bank name by finding all references to BankLoad()
+            //Then we search for that bank file in the bank folder
             MatchCollection matches = BANK_LOAD_REGEX.Matches(galaxyScriptCode);
             List<BankInfo> banksUsed = new List<BankInfo>();
             foreach(Match match in matches)
