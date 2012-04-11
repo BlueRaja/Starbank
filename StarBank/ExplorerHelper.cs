@@ -33,5 +33,19 @@ namespace StarBank
 
             Process.Start(filePath);
         }
+
+        //TODO: This doesn't belong here...
+        /// <summary>
+        /// Returns a string that's safe to use as a filename
+        /// </summary>
+        public string GetFileSafeName(string fileName)
+        {
+            fileName = fileName.Substring(0, Math.Min(30, fileName.Length));
+            foreach(char c in Path.GetInvalidFileNameChars())
+            {
+                fileName = fileName.Replace(c, '_');
+            }
+            return fileName;
+        }
     }
 }

@@ -103,6 +103,14 @@ namespace StarBank
             RefreshListBox();
         }
 
+        #region Context menu
+        private ExplorerHelper _explorerHelper = new ExplorerHelper();
+
+        private void contextMenuStrip1_Opened(object sender, EventArgs e)
+        {
+            openMapToolStripMenuItem.Image = (_selectedMap.IsProtected ? Properties.Resources.lockIcon : null);
+        }
+
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {
             Point clientPoint = listBox1.PointToClient(MousePosition);
@@ -116,14 +124,6 @@ namespace StarBank
                 listBox1.SelectedIndex = listBoxIndex;
             }
         }
-
-        private void contextMenuStrip1_Opened(object sender, EventArgs e)
-        {
-            openMapToolStripMenuItem.Image = (_selectedMap.IsProtected ? Properties.Resources.lockIcon : null); 
-        }
-
-        #region Context menu
-        private ExplorerHelper _explorerHelper = new ExplorerHelper();
 
         private void openMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -143,7 +143,7 @@ namespace StarBank
 
         private void saveMapToToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.FileName = _selectedMap.Name + ".SC2Map";
+            saveFileDialog1.FileName = _explorerHelper.GetFileSafeName(_selectedMap.Name) + ".SC2Map";
             saveFileDialog1.Title = "Save map to...";
             saveFileDialog1.Filter = "Starcraft 2 Map (*.SC2Map)|*.SC2Map|Starcraft 2 Cache File (*.s2ma)|*.s2ma|Starcraft 2 Cache File (*.s2ml)|*.s2ml|Blizzard Archive (*.mpq)|*.mpq";
             if(saveFileDialog1.ShowDialog() == DialogResult.OK)
@@ -170,14 +170,14 @@ namespace StarBank
 
         private void openGalaxyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string extractTo = Path.Combine(Path.GetTempPath(), _selectedMap.Name + ".galaxy");
+            string extractTo = Path.Combine(Path.GetTempPath(), _explorerHelper.GetFileSafeName(_selectedMap.Name) + ".galaxy");
             _mapInfoCache.ExtractGalaxyScriptFileTo(_selectedMap, extractTo);
             _explorerHelper.OpenFile(extractTo);
         }
 
         private void saveGalaxyToToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.FileName = _selectedMap.Name + ".galaxy";
+            saveFileDialog1.FileName = _explorerHelper.GetFileSafeName(_selectedMap.Name) + ".galaxy";
             saveFileDialog1.Title = "Save map trigger code to...";
             saveFileDialog1.Filter = "Starcraft 2 Galaxyscript (*.galaxy)|(*.galaxy)|Text file (*.txt)|*.txt";
             if(saveFileDialog1.ShowDialog() == DialogResult.OK)
@@ -198,7 +198,7 @@ namespace StarBank
 
         private void saveBankToToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.FileName = _selectedMap.BankInfos.First().Name + ".SC2Bank";
+            saveFileDialog1.FileName = _explorerHelper.GetFileSafeName(_selectedMap.BankInfos.First().Name) + ".SC2Bank";
             saveFileDialog1.Title = "Save bank file to...";
             saveFileDialog1.Filter = "Starcraft 2 Bank File (*.SC2Bank)|*.SC2Bank";
             if(saveFileDialog1.ShowDialog() == DialogResult.OK)
