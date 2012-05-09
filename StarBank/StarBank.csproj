@@ -108,6 +108,12 @@
       <DependentUpon>PlayerNumberForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="ProgressBarControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ProgressBarControl.Designer.cs">
+      <DependentUpon>ProgressBarControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StormLibWrapper.cs" />
     <Compile Include="NewSectionForm.cs">
@@ -130,6 +136,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PlayerNumberForm.resx">
       <DependentUpon>PlayerNumberForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProgressBarControl.resx">
+      <DependentUpon>ProgressBarControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
