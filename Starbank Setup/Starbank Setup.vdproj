@@ -155,11 +155,6 @@
             "AssemblyAsmDisplayName" = "8:ObjectListView, Version=2.5.0.32482, Culture=neutral, PublicKeyToken=b1c5bf581481bcd4, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
-                    "_06ECCD3D459F8747089B172F54288165"
-                    {
-                    "Name" = "8:ObjectListView.dll"
-                    "Attributes" = "3:512"
-                    }
                 }
             "SourcePath" = "8:ObjectListView.dll"
             "TargetName" = "8:"
@@ -255,15 +250,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Starbank"
-        "ProductCode" = "8:{F3B7A789-5C1C-44C3-B1FE-2863A13FA7AA}"
-        "PackageCode" = "8:{8F8101A6-DA96-488F-83B6-824458CC0971}"
+        "ProductCode" = "8:{FA8482C9-3907-478E-92A1-7D3293D2864C}"
+        "PackageCode" = "8:{A63203C8-9221-44D9-B51E-9BAA98D35909}"
         "UpgradeCode" = "8:{764A1D85-D212-40C2-BCDB-CDF58A949390}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.12"
+        "ProductVersion" = "8:1.0.13"
         "Manufacturer" = "8:BlueRaja"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
