@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,9 +16,17 @@ namespace StarBank
                                                     @"Blizzard Entertainment\Battle.net\Cache");
 
         //Regex to find the map-name within the DocumentHeader file
-        private readonly Regex MAP_NAME_REGEX = new Regex("DocInfo/Name.....\x00(.+?)\x15\x00");
+        private readonly Regex MAP_NAME_REGEX = new Regex("DocInfo/Name.....\x00(.+?).\x00", RegexOptions.Compiled | RegexOptions.Singleline);
 
         private readonly BankInfoCache _bankInfoCache;
+
+        //For progress bars
+        public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+        private void OnProgressChanged(double progress)
+        {
+            if(ProgressChanged != null)
+                ProgressChanged(this, new ProgressChangedEventArgs((int)(progress * 100), null));
+        }
 
         public MapInfoCache(BankInfoCache _bankInfoCache)
         {
@@ -27,6 +36,7 @@ namespace StarBank
         /// <summary>
         /// Returns a list of all SCII maps found on the system (in the cache).
         /// Removed duplicates (only the latest version of a map is returned) based on the map's name
+        /// Note that BankInfoCache.InitializeCache() MUST be called before this method!!
         /// </summary>
         public IEnumerable<MapInfo> GetMaps()
         {
@@ -34,6 +44,8 @@ namespace StarBank
             SortedList<string, MapInfo> mapList = new SortedList<string, MapInfo>();
             DirectoryInfo cacheFolder = new DirectoryInfo(CACHE_FOLDER);
             IEnumerable<FileInfo> mapFiles = cacheFolder.GetFiles("*.s2ma", SearchOption.AllDirectories);
+            int numMapFiles = mapFiles.Count();
+            int numMapsProcessed = 0;
 
             foreach (FileInfo file in mapFiles)
             {
@@ -52,6 +64,9 @@ namespace StarBank
                     //(See GetBanksFromCode() for more info)
                     mapInfo.BankInfos = _bankInfoCache.GetBanksFromCode(galaxyScriptCode);
                 }
+
+                numMapsProcessed++;
+                OnProgressChanged((double) numMapsProcessed/numMapFiles);
             }
 
             return mapList.Values;
@@ -67,19 +82,25 @@ namespace StarBank
         private MapInfo GetMapInfo(FileInfo file, string galaxyScriptCode)
         {
             string[] lines = galaxyScriptCode.Split('\n');
-            if(lines.Length < 6 || !lines[4].StartsWith("// Name:"))
+            if(lines.Length >= 6 && lines[4].StartsWith("// Name:"))
             {
-                return GetMapInfoFromDocumentHeader(file);
+                string mapName = lines[4].Substring(10).Trim();
+                if(!string.IsNullOrEmpty(mapName))
+                {
+                    //Hack:  The map-name and author name are listed as comments in the galaxy-script file
+                    //Open that file, find the comments, and read them
+                    MapInfo mapInfo = new MapInfo();
+                    mapInfo.CachePath = file.FullName;
+                    mapInfo.DateCreated = file.LastWriteTime;
+                    mapInfo.Name = mapName;
+                    mapInfo.AuthorName = (lines[5].StartsWith("// Author:") ? lines[5].Substring(10).Trim() : "(Unknown)");
+                    return mapInfo;
+                }
             }
 
-            //Hack:  The map-name and author name are listed as comments in the galaxy-script file
-            //Open that file, find the comments, and read them
-            MapInfo mapInfo = new MapInfo();
-            mapInfo.CachePath = file.FullName;
-            mapInfo.DateCreated = file.LastWriteTime;
-            mapInfo.Name = lines[4].Substring(10).Trim();
-            mapInfo.AuthorName = (lines[5].StartsWith("// Author:") ? lines[5].Substring(10).Trim() : "(Unknown)");
-            return mapInfo;
+            //Use the document-header name in cases where we can't find it in the galaxyscript file
+            //Usually this name is uglier (and is sometimes filled with garbage??), so we only want to use it if we have to
+            return GetMapInfoFromDocumentHeader(file);
         }
 
         /// <summary>

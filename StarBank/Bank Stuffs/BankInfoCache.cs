@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace StarBank.Bank_Stuffs
 {
@@ -16,11 +18,19 @@ namespace StarBank.Bank_Stuffs
 
         //Regex to look for the string BankLoad("something") - the "something" is what we're looking for
         //(the name of the bank)
-        private readonly Regex BANK_LOAD_REGEX = new Regex(@"BankLoad\(""(.+?)""", RegexOptions.Singleline);
+        private readonly Regex BANK_LOAD_REGEX = new Regex(@"BankLoad\(""(.+?)""", RegexOptions.Singleline | RegexOptions.Compiled);
+        private readonly Regex BANK_LOAD_VARIABLE_REGEX = new Regex(@"BankLoad\(([^""]+?)[,\)]", RegexOptions.Singleline | RegexOptions.Compiled);
+
+        //For progress bars
+        public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+        private void OnProgressChanged(double progress)
+        {
+            if(ProgressChanged != null)
+                ProgressChanged(this, new ProgressChangedEventArgs((int)(progress*100), null));
+        }
 
         public BankInfoCache()
         {
-            InitializeCache();
         }
 
         /// <summary>
@@ -31,10 +41,13 @@ namespace StarBank.Bank_Stuffs
         /// sure how to get the author-number from the MPQ file, we have to make a guesstimate
         /// as to which bank is the correct one.  I take the one most recently modified.
         /// </summary>
-        private void InitializeCache()
+        public void InitializeCache()
         {
             DirectoryInfo bankFolder = new DirectoryInfo(BANKS_FOLDER);
             IEnumerable<FileInfo> bankFiles = bankFolder.GetFiles("*.SC2Bank", SearchOption.AllDirectories);
+            int numBanksTotal = bankFiles.Count();
+            int numBanksProcessed = 0;
+
             foreach(FileInfo file in bankFiles)
             {
                 string bankCacheKey = file.Name.ToLower();
@@ -49,6 +62,8 @@ namespace StarBank.Bank_Stuffs
                     BankInfo bankInfo = CreateBankInfo(file.FullName);
                     _bankCache[bankCacheKey] = bankInfo;
                 }
+                numBanksProcessed++;
+                OnProgressChanged((double)numBanksProcessed/numBanksTotal);
             }
         }
 
@@ -73,29 +88,60 @@ namespace StarBank.Bank_Stuffs
         /// Given the trigger-code for some map, will determine if it uses a bank, and if so, 
         /// return references to all the BankInfos for the banks it uses
         /// </summary>
-        /// <exception cref="BankNotFoundException">
-        /// Throws a BankNotFoundException if the given code references a bank, but that bank
-        /// is not found in the cache
-        /// </exception>
         public IEnumerable<BankInfo> GetBanksFromCode(string galaxyScriptCode)
         {
             //We guess the bank name by finding all references to BankLoad()
             //Then we search for that bank file in the bank folder
-            MatchCollection matches = BANK_LOAD_REGEX.Matches(galaxyScriptCode);
             List<BankInfo> banksUsed = new List<BankInfo>();
-            foreach(Match match in matches)
+            IEnumerable<string> bankNames = GetBankNamesFromCode(galaxyScriptCode);
+            foreach(string bankName in bankNames)
             {
-                string bankCacheKey = match.Groups[1].Value.ToLower() + ".sc2bank";
-                if(_bankCache.ContainsKey(bankCacheKey))
+                if(_bankCache.ContainsKey(bankName))
                 {
-                    if (!banksUsed.Contains(_bankCache[bankCacheKey]))
-                        banksUsed.Add(_bankCache[bankCacheKey]);
+                    if(!banksUsed.Contains(_bankCache[bankName]))
+                        banksUsed.Add(_bankCache[bankName]);
                 } else
                 {
-                    //TODO: Bank not found.  Figure out what to do here.
+                    //Should something be done if the bank isn't found?
                 }
             }
             return banksUsed;
+        }
+
+        /// <summary>
+        /// Given the galaxyscript code, returns a list of possible banknames used by it
+        /// </summary>
+        private IEnumerable<string> GetBankNamesFromCode(string galaxyScriptCode)
+        {
+            List<string> bankNames = new List<string>();
+
+            //We guess the bank name by finding all references to BankLoad()
+            //Then we search for that bank file in the bank folder
+            MatchCollection matches = BANK_LOAD_REGEX.Matches(galaxyScriptCode);
+            foreach(Match match in matches)
+            {
+                string bankName = match.Groups[1].Value.ToLower() + ".sc2bank";
+                if(!bankNames.Contains(bankName))
+                    bankNames.Add(bankName);
+            }
+
+            //A bit more difficult:  some maps use a variable instead of hard-coding the bank-name directly in the function.
+            //I'm not going to write a parser o_O but we can take care of the 90% case by simply searching for the string 'variableName = "whatever"'
+            matches = BANK_LOAD_VARIABLE_REGEX.Matches(galaxyScriptCode);
+            foreach(Match match in matches)
+            {
+                string variableName = match.Groups[1].Value.Trim();
+                Regex variableRegex = new Regex(@"\s*" + variableName + @"\s*=\s*""([a-zA-Z1-9_ ]+?)""");
+                MatchCollection variableMatches = variableRegex.Matches(galaxyScriptCode);
+                foreach(Match variableMatch in variableMatches)
+                {
+                    string bankName = variableMatch.Groups[1].Value.ToLower() + ".sc2bank";
+                    if(!bankNames.Contains(bankName))
+                        bankNames.Add(bankName);
+                }
+            }
+
+            return bankNames;
         }
 
         /// <summary>
