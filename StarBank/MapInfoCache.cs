@@ -51,20 +51,19 @@ namespace StarBank
             {
                 string galaxyScriptCode = GetGalaxyScriptCode(file);
                 MapInfo mapInfo = GetMapInfo(file, galaxyScriptCode);
-                if(mapInfo == null)
-                    continue;
-
-                bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
-                if(mapAdded)
+                if(mapInfo != null)
                 {
-                    //Only do other expensive stuff if map was not a duplicate
-                    mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
+                    bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
+                    if (mapAdded)
+                    {
+                        //Only do other expensive stuff if map was not a duplicate
+                        mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
 
-                    //Use the galaxyscript-code we already loaded to find the bank-names
-                    //(See GetBanksFromCode() for more info)
-                    mapInfo.BankInfos = _bankInfoCache.GetBanksFromCode(galaxyScriptCode);
+                        //Use the galaxyscript-code we already loaded to find the bank-names
+                        //(See GetBanksFromCode() for more info)
+                        mapInfo.BankInfos = _bankInfoCache.GetBanksFromCode(galaxyScriptCode);
+                    }
                 }
-
                 numMapsProcessed++;
                 OnProgressChanged((double) numMapsProcessed/numMapFiles);
             }
