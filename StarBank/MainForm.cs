@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using StarBank.Bank_Stuffs;
 
@@ -18,20 +19,29 @@ namespace StarBank
         private IEnumerable<MapInfo> _mapList;
         private MapInfo _selectedMap;
         private Bank _selectedMapBank;
+        private ProgressBarControl _progressBarControl;
+        private bool _isBankCacheLoaded; //Used to help set the progress bar to a proper length
 
         public MainForm()
         {
             InitializeComponent();
-
+            splitContainer1.Visible = false;
             _bankInfoCache = new BankInfoCache();
             _mapInfoCache = new MapInfoCache(_bankInfoCache);
-            GetFileList();
+
+            //Create a progress bar and show it on the form
+            _progressBarControl = new ProgressBarControl();
+            this.Controls.Add(_progressBarControl);
+            _progressBarControl.Dock = DockStyle.Fill;
+            _progressBarControl.BringToFront();
+            _progressBarControl.Visible = true;
         }
 
-        private void GetFileList()
+        private void MainForm_Load(object sender, EventArgs e)
         {
-            _mapList = _mapInfoCache.GetMaps();
-            RefreshListBox();
+            _bankInfoCache.ProgressChanged += (a, args) => backgroundWorker1.ReportProgress(args.ProgressPercentage);
+            _mapInfoCache.ProgressChanged += (a, args) => backgroundWorker1.ReportProgress(args.ProgressPercentage);
+            backgroundWorker1.RunWorkerAsync();
         }
 
         private void listBox1_Format(object sender, ListControlConvertEventArgs e)
@@ -43,9 +53,9 @@ namespace StarBank
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             _selectedMap = (MapInfo)listBox1.SelectedItem;
-            lblMapName.Text = _selectedMap.Name;
-            lblAuthor.Text = "Created by: " + _selectedMap.AuthorName;
-            lblLastUpdate.Text = "Last update downloaded on " + _selectedMap.DateCreated.ToShortDateString();
+            lblMapName.Text = (_selectedMap != null ? _selectedMap.Name : "");
+            lblAuthor.Text = "Created by: " + (_selectedMap != null ? _selectedMap.AuthorName : "");
+            lblLastUpdate.Text = "Last update downloaded on " + (_selectedMap != null ? _selectedMap.DateCreated.ToShortDateString() : "");
 
             RefreshBankChoiceDropdown();
             RefreshBankListView();
@@ -58,17 +68,31 @@ namespace StarBank
 
         private void RefreshBankChoiceDropdown()
         {
-            panelMultipleBankFiles.Visible = (_selectedMap.BankInfos.Count() > 1);
+            if(_selectedMap != null)
+            {
+                panelMultipleBankFiles.Visible = (_selectedMap != null && _selectedMap.BankInfos.Count() > 1);
 
-            //Need to repopulate the cmbBankFile dropdown anyways, because that is where
-            //the ListView gets the BankInfo from
-            cmbBankFile.Items.Clear();
-            cmbBankFile.Items.AddRange(_selectedMap.BankInfos.OrderBy(o => o.Name).ToArray());
-            cmbBankFile.SelectedItem = _selectedMap.BankInfos.FirstOrDefault();
+                //Need to repopulate the cmbBankFile dropdown anyways, because that is where
+                //the ListView gets the BankInfo from
+                cmbBankFile.Items.Clear();
+                cmbBankFile.Items.AddRange(_selectedMap.BankInfos.OrderBy(o => o.Name).ToArray());
+                cmbBankFile.SelectedItem = _selectedMap.BankInfos.FirstOrDefault();
+            }
+            else
+            {
+                panelMultipleBankFiles.Visible = false;
+            }
         }
 
         private void RefreshBankListView()
         {
+            if(_selectedMap == null)
+            {
+                _selectedMapBank = null;
+                bankEditor1.Bank = null;
+                return;
+            }
+
             if(_selectedMapBank == null || cmbBankFile.SelectedItem != _selectedMapBank.BankInfo)
             {
                 //Refresh the bank also
@@ -276,5 +300,39 @@ namespace StarBank
             new AboutBox().ShowDialog();
         }
         #endregion
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            _isBankCacheLoaded = false;
+            _progressBarControl.Status = "Initializing bank cache (Step 1/2)";
+            _bankInfoCache.InitializeCache();
+
+            //For some impossible-to-fathom reason, sometimes the below code is called before
+            //_bankInfoCache.InitializeCache() is complete (what!? it's all being run on the same thread!!
+            //I have no fucking clue).  The Thread.Sleep(1) call appears to mitigate that issue, though why, I have no idea.
+            Thread.Sleep(1);
+            _isBankCacheLoaded = true;
+            _progressBarControl.Status = "Initializing map cache (Step 2/2)";
+            _mapList = _mapInfoCache.GetMaps();
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            RefreshListBox();
+            splitContainer1.Visible = true;
+
+            //Hide progress bar and remove floating references
+            _progressBarControl.Visible = false;
+            this.Controls.Remove(_progressBarControl);
+            _progressBarControl = null;
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            lock(_progressBarControl)
+            {
+                _progressBarControl.Progress = (_isBankCacheLoaded ? 50 : 0) + e.ProgressPercentage/2;
+            }
+        }
     }
 }
