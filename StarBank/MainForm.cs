@@ -39,8 +39,8 @@ namespace StarBank
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            _bankInfoCache.ProgressChanged += (a, args) => backgroundWorker1.ReportProgress(args.ProgressPercentage);
-            _mapInfoCache.ProgressChanged += (a, args) => backgroundWorker1.ReportProgress(args.ProgressPercentage);
+            _bankInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
+            _mapInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             backgroundWorker1.RunWorkerAsync();
         }
 
@@ -307,10 +307,6 @@ namespace StarBank
             _progressBarControl.Status = "Initializing bank cache (Step 1/2)";
             _bankInfoCache.InitializeCache();
 
-            //For some impossible-to-fathom reason, sometimes the below code is called before
-            //_bankInfoCache.InitializeCache() is complete (what!? it's all being run on the same thread!!
-            //I have no fucking clue).  The Thread.Sleep(1) call appears to mitigate that issue, though why, I have no idea.
-            Thread.Sleep(1);
             _isBankCacheLoaded = true;
             _progressBarControl.Status = "Initializing map cache (Step 2/2)";
             _mapList = _mapInfoCache.GetMaps();
@@ -327,12 +323,31 @@ namespace StarBank
             _progressBarControl = null;
         }
 
+        private bool _isReportingProgress;
+        private void DoReportProgress(int progressPercentage)
+        {
+            _isReportingProgress = true;
+            backgroundWorker1.ReportProgress(progressPercentage);
+            while(_isReportingProgress) //Set to false in backgroundWorker1_ProgressChanged
+            {
+                Thread.Sleep(1);
+            }
+        }
+
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            lock(_progressBarControl)
+            //Make the bank-cache go from 0 to bankCachePercentage, then the map-cache go from bankCachePercentage to 100
+            const int bankCachePercentage = 20;
+            if(!_isBankCacheLoaded)
             {
-                _progressBarControl.Progress = (_isBankCacheLoaded ? 50 : 0) + e.ProgressPercentage/2;
+                _progressBarControl.Progress = e.ProgressPercentage*bankCachePercentage/100;
             }
+            else
+            {
+                _progressBarControl.Progress = bankCachePercentage +
+                                               e.ProgressPercentage*(100 - bankCachePercentage)/100;
+            }
+            _isReportingProgress = false;
         }
     }
 }
