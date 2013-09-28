@@ -44,6 +44,9 @@ namespace StarBank.Bank_Stuffs
         public void InitializeCache()
         {
             DirectoryInfo bankFolder = new DirectoryInfo(BANKS_FOLDER);
+            if(!bankFolder.Exists)
+                return;
+
             IEnumerable<FileInfo> bankFiles = bankFolder.GetFiles("*.SC2Bank", SearchOption.AllDirectories);
             int numBanksTotal = bankFiles.Count();
             int numBanksProcessed = 0;

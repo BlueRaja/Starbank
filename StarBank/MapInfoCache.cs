@@ -43,6 +43,9 @@ namespace StarBank
             MapProtection mapProtection = new MapProtection();
             SortedList<string, MapInfo> mapList = new SortedList<string, MapInfo>();
             DirectoryInfo cacheFolder = new DirectoryInfo(CACHE_FOLDER);
+            if (!cacheFolder.Exists)
+                return mapList.Values;
+
             IEnumerable<FileInfo> mapFiles = cacheFolder.GetFiles("*.s2ma", SearchOption.AllDirectories);
             int numMapFiles = mapFiles.Count();
             int numMapsProcessed = 0;
