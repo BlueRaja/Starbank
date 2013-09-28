@@ -57,7 +57,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(155, 13);
             this.label2.TabIndex = 1;
-            this.label2.Text = "Written by BlueRaja 2011-2012";
+            this.label2.Text = "Written by BlueRaja 2011-2013";
             // 
             // label3
             // 
