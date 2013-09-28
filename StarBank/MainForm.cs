@@ -107,13 +107,16 @@ namespace StarBank
         private void RefreshListBox()
         {
             IEnumerable<MapInfo> mapsToAdd = _mapList;
-            if(cbxHideBlizzard.Checked)
-                mapsToAdd = mapsToAdd.Where(o => o.AuthorName != "Blizzard Entertainment");
-            if(cbxHideMapsWithoutBank.Checked)
-                mapsToAdd = mapsToAdd.Where(o => o.BankInfos.Any());
+            if(mapsToAdd.Any())
+            {
+                if (cbxHideBlizzard.Checked)
+                    mapsToAdd = mapsToAdd.Where(o => o.AuthorName != "Blizzard Entertainment");
+                if (cbxHideMapsWithoutBank.Checked)
+                    mapsToAdd = mapsToAdd.Where(o => o.BankInfos.Any());
 
-            listBox1.Items.Clear();
-            listBox1.Items.AddRange(mapsToAdd.ToArray());
+                listBox1.Items.Clear();
+                listBox1.Items.AddRange(mapsToAdd.ToArray());
+            }
         }
 
         private void cmbBankFile_Format(object sender, ListControlConvertEventArgs e)
