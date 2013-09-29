@@ -133,7 +133,7 @@ namespace StarBank.Bank_Stuffs
             matches = BANK_LOAD_VARIABLE_REGEX.Matches(galaxyScriptCode);
             foreach(Match match in matches)
             {
-                string variableName = match.Groups[1].Value.Trim();
+                string variableName = Regex.Escape(match.Groups[1].Value.Trim());
                 Regex variableRegex = new Regex(@"\s*" + variableName + @"\s*=\s*""([a-zA-Z1-9_ ]+?)""");
                 MatchCollection variableMatches = variableRegex.Matches(galaxyScriptCode);
                 foreach(Match variableMatch in variableMatches)
