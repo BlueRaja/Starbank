@@ -317,6 +317,12 @@ namespace StarBank
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
+            if(!_mapList.Any())
+            {
+                MessageBox.Show("Warning:  No maps found.  Is Starcraft II installed?", "No maps found", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             RefreshListBox();
             splitContainer1.Visible = true;
 
