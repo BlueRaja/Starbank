@@ -8,3 +8,5 @@ syntax: regexp
 \.vsmdi$
 syntax: glob
 Starbank Setup/Debug/*
+StarBank Setup/StarBank Setup-cache/
+StarBank Setup/x86_ReleaseSetupFiles/
