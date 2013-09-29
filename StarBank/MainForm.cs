@@ -306,13 +306,25 @@ namespace StarBank
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            _isBankCacheLoaded = false;
-            _progressBarControl.Status = "Initializing bank cache (Step 1/2)";
-            _bankInfoCache.InitializeCache();
+            try
+            {
+                _isBankCacheLoaded = false;
+                _progressBarControl.Status = "Initializing bank cache (Step 1/2)";
+                _bankInfoCache.InitializeCache();
 
-            _isBankCacheLoaded = true;
-            _progressBarControl.Status = "Initializing map cache (Step 2/2)";
-            _mapList = _mapInfoCache.GetMaps();
+                _isBankCacheLoaded = true;
+                _progressBarControl.Status = "Initializing map cache (Step 2/2)";
+                _mapList = _mapInfoCache.GetMaps();
+            }
+            catch(Exception exception)
+            {
+                this.Invoke(new Action(() => 
+                {
+                    MessageBox.Show(this,
+                        "An error occurred while loading the maps.\r\nPlease screenshot this error and inform the author of this program.\n" + exception.Message + "\r\n" + exception.StackTrace,
+                        "An error occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }));
+            }
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
