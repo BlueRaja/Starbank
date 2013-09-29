@@ -82,9 +82,9 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(20, 134);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(163, 13);
+            this.label5.Size = new System.Drawing.Size(209, 13);
             this.label5.TabIndex = 4;
-            this.label5.Text = "and to ponsfonze, pandizzle, and";
+            this.label5.Text = "and to ponsfonze, pandizzle, Messiah.Roy,";
             // 
             // btnOk
             // 
@@ -110,9 +110,9 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(20, 151);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(117, 13);
+            this.label7.Size = new System.Drawing.Size(128, 13);
             this.label7.TabIndex = 7;
-            this.label7.Text = "Messiah.Roy for testing";
+            this.label7.Text = "and Squirt1971 for testing";
             // 
             // label8
             // 
