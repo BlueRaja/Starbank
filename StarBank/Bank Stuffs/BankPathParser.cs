@@ -9,7 +9,7 @@ namespace StarBank.Bank_Stuffs
 {
     public class BankPathParser
     {
-        private static readonly Regex VALID_NUMBER = new Regex(@"\A1-S2-1-\d+\Z");
+        private static readonly Regex VALID_NUMBER = new Regex(@"\A\d-S\d-\d-\d+\Z");
 
         public BankPathParser(Bank bank) : this(bank.BankInfo.BankPath)
         {
