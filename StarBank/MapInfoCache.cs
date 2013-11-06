@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using StarBank.Bank_Stuffs;
 
 namespace StarBank
@@ -49,26 +52,46 @@ namespace StarBank
             int numMapFiles = mapFiles.Count();
             int numMapsProcessed = 0;
 
-            foreach(FileInfo file in mapFiles)
-            {
-                string galaxyScriptCode = GetGalaxyScriptCode(file);
-                MapInfo mapInfo = GetMapInfo(file, galaxyScriptCode);
-                if(mapInfo != null)
+            //Load the maps in parallel!
+            Parallel.ForEach(mapFiles,
+                //Initialization
+                () => new SortedList<string, MapInfo>(),
+    
+                //Loop body
+                (file, loopState, mapListThread) =>
                 {
-                    bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
-                    if(mapAdded)
+                    string galaxyScriptCode = GetGalaxyScriptCode(file);
+                    MapInfo mapInfo = GetMapInfo(file, galaxyScriptCode);
+                    if(mapInfo != null)
                     {
-                        //Only do other expensive stuff if map was not a duplicate
-                        mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
+                        bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapListThread);
+                        if(mapAdded)
+                        {
+                            //Only do other expensive stuff if map was not a duplicate
+                            mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
 
-                        //Use the galaxyscript-code we already loaded to find the bank-names
-                        //(See GetBanksFromCode() for more info)
-                        mapInfo.BankInfos = _bankInfoLoader.GetBanksFromCode(galaxyScriptCode);
+                            //Use the galaxyscript-code we already loaded to find the bank-names
+                            //(See GetBanksFromCode() for more info)
+                            mapInfo.BankInfos = _bankInfoLoader.GetBanksFromCode(galaxyScriptCode);
+                        }
+                    }
+                    Interlocked.Increment(ref numMapsProcessed);
+                    OnProgressChanged((double) numMapsProcessed/numMapFiles);
+                    return mapListThread;
+                },
+
+                //Finalization
+                mapListThread =>
+                {
+                    lock(mapList)
+                    {
+                        foreach(var key in mapListThread.Keys)
+                        {
+                            CheckForDuplicatesAndAdd(mapListThread[key], mapList);
+                        }
                     }
                 }
-                numMapsProcessed++;
-                OnProgressChanged((double) numMapsProcessed/numMapFiles);
-            }
+                );
 
             return mapList.Values;
         }
@@ -150,7 +173,7 @@ namespace StarBank
         /// Adds the map-info to the list, checking that a newer version of the map has not
         /// already been added
         /// </summary>
-        private bool CheckForDuplicatesAndAdd(MapInfo mapInfo, SortedList<string, MapInfo> mapList)
+        private static bool CheckForDuplicatesAndAdd(MapInfo mapInfo, SortedList<string, MapInfo> mapList)
         {
             //Need a single key to reference into the list, but want to include
             //both map-name and author-name.  Just concatenate them with an "@" symbol or something.
