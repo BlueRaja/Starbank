@@ -41,7 +41,16 @@ namespace StarBank
         {
             _bankInfoLoader.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             _mapInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
+            PopulateAccountComboBox();
             backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void PopulateAccountComboBox()
+        {
+            cmbAccount.Items.AddRange(_bankInfoLoader.GetAccountNumbers().ToArray());
+            if(cmbAccount.Items.Count > 0)
+                cmbAccount.SelectedIndex = 0;
+            panelAccount.Visible = (cmbAccount.Items.Count > 1);
         }
 
         private void listBox1_Format(object sender, ListControlConvertEventArgs e)
@@ -70,18 +79,24 @@ namespace StarBank
         {
             if(_selectedMap != null)
             {
-                panelMultipleBankFiles.Visible = (_selectedMap != null && _selectedMap.BankInfos.Count() > 1);
+                IEnumerable<BankInfo> bankInfos = GetApplicableBankInfos(_selectedMap).ToList();
+                panelMultipleBankFiles.Visible = (bankInfos.Count() > 1);
 
                 //Need to repopulate the cmbBankFile dropdown anyways, because that is where
                 //the ListView gets the BankInfo from
                 cmbBankFile.Items.Clear();
-                cmbBankFile.Items.AddRange(_selectedMap.BankInfos.OrderBy(o => o.Name).ToArray());
-                cmbBankFile.SelectedItem = _selectedMap.BankInfos.FirstOrDefault();
+                cmbBankFile.Items.AddRange(bankInfos.OrderBy(o => o.Name).ToArray());
+                cmbBankFile.SelectedItem = bankInfos.FirstOrDefault();
             }
             else
             {
                 panelMultipleBankFiles.Visible = false;
             }
+        }
+
+        private IEnumerable<BankInfo> GetApplicableBankInfos(MapInfo map)
+        {
+            return map.BankInfos.Where(o => o.PlayerNumber == (string)cmbAccount.SelectedItem);
         }
 
         private void RefreshBankListView()
@@ -107,12 +122,12 @@ namespace StarBank
         private void RefreshListBox()
         {
             IEnumerable<MapInfo> mapsToAdd = _mapList;
-            if(mapsToAdd.Any())
+            if(mapsToAdd != null && mapsToAdd.Any())
             {
                 if (cbxHideBlizzard.Checked)
                     mapsToAdd = mapsToAdd.Where(o => o.AuthorName != "Blizzard Entertainment");
                 if (cbxHideMapsWithoutBank.Checked)
-                    mapsToAdd = mapsToAdd.Where(o => o.BankInfos.Any());
+                    mapsToAdd = mapsToAdd.Where(o => GetApplicableBankInfos(o).Any());
 
                 listBox1.Items.Clear();
                 listBox1.Items.AddRange(mapsToAdd.ToArray());
@@ -126,6 +141,11 @@ namespace StarBank
         }
 
         private void cbxCheckedChanged(object sender, EventArgs e)
+        {
+            RefreshListBox();
+        }
+
+        private void cmbAccount_SelectedIndexChanged(object sender, EventArgs e)
         {
             RefreshListBox();
         }
