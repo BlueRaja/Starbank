@@ -3,34 +3,33 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using StarBank.Bank_Stuffs;
 using System.Text.RegularExpressions;
+using StarBank.Bank_Stuffs;
 
 namespace StarBank
 {
     public class MapInfoCache
     {
         private readonly string CACHE_FOLDER = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-                                                    @"Blizzard Entertainment\Battle.net\Cache");
+            @"Blizzard Entertainment\Battle.net\Cache");
 
         //Regex to find the map-name within the DocumentHeader file
         private readonly Regex MAP_NAME_REGEX = new Regex("DocInfo/Name.....\x00(.+?).\x00", RegexOptions.Compiled | RegexOptions.Singleline);
 
-        private readonly BankInfoCache _bankInfoCache;
+        private readonly BankInfoLoader _bankInfoLoader;
 
         //For progress bars
         public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
+
         private void OnProgressChanged(double progress)
         {
             if(ProgressChanged != null)
-                ProgressChanged(this, new ProgressChangedEventArgs((int)(progress * 100), null));
+                ProgressChanged(this, new ProgressChangedEventArgs((int) (progress*100), null));
         }
 
-        public MapInfoCache(BankInfoCache _bankInfoCache)
+        public MapInfoCache(BankInfoLoader bankInfoLoader)
         {
-            this._bankInfoCache = _bankInfoCache;
+            _bankInfoLoader = bankInfoLoader;
         }
 
         /// <summary>
@@ -43,28 +42,28 @@ namespace StarBank
             MapProtection mapProtection = new MapProtection();
             SortedList<string, MapInfo> mapList = new SortedList<string, MapInfo>();
             DirectoryInfo cacheFolder = new DirectoryInfo(CACHE_FOLDER);
-            if (!cacheFolder.Exists)
+            if(!cacheFolder.Exists)
                 return mapList.Values;
 
             IEnumerable<FileInfo> mapFiles = cacheFolder.GetFiles("*.s2ma", SearchOption.AllDirectories);
             int numMapFiles = mapFiles.Count();
             int numMapsProcessed = 0;
 
-            foreach (FileInfo file in mapFiles)
+            foreach(FileInfo file in mapFiles)
             {
                 string galaxyScriptCode = GetGalaxyScriptCode(file);
                 MapInfo mapInfo = GetMapInfo(file, galaxyScriptCode);
                 if(mapInfo != null)
                 {
                     bool mapAdded = CheckForDuplicatesAndAdd(mapInfo, mapList);
-                    if (mapAdded)
+                    if(mapAdded)
                     {
                         //Only do other expensive stuff if map was not a duplicate
                         mapInfo.IsProtected = mapProtection.IsMapProtected(file.FullName);
 
                         //Use the galaxyscript-code we already loaded to find the bank-names
                         //(See GetBanksFromCode() for more info)
-                        mapInfo.BankInfos = _bankInfoCache.GetBanksFromCode(galaxyScriptCode);
+                        mapInfo.BankInfos = _bankInfoLoader.GetBanksFromCode(galaxyScriptCode);
                     }
                 }
                 numMapsProcessed++;
@@ -127,9 +126,9 @@ namespace StarBank
 
         private string GetGalaxyScriptCode(FileInfo mpqFile)
         {
-            using (StormLibWrapper.MpqArchive archive = new StormLibWrapper.MpqArchive(mpqFile.FullName))
+            using(StormLibWrapper.MpqArchive archive = new StormLibWrapper.MpqArchive(mpqFile.FullName))
             {
-                using (StormLibWrapper.MpqInternalFile galaxyScriptFile = archive.OpenFile("MapScript.galaxy"))
+                using(StormLibWrapper.MpqInternalFile galaxyScriptFile = archive.OpenFile("MapScript.galaxy"))
                 {
                     return galaxyScriptFile.ReadFile();
                 }
@@ -160,7 +159,7 @@ namespace StarBank
             if(mapList.ContainsKey(key))
             {
                 MapInfo potentialDuplicate = mapList[key];
-                if (potentialDuplicate.DateCreated >= mapInfo.DateCreated)
+                if(potentialDuplicate.DateCreated >= mapInfo.DateCreated)
                     return false;
                 mapList.Remove(key);
             }
