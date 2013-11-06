@@ -11,10 +11,10 @@
     <ROW Property="CTRLS" Value="2"/>
     <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:3"/>
     <ROW Property="Manufacturer" Value="BlueRaja"/>
-    <ROW Property="ProductCode" Value="1033:{D91A7057-8360-4239-AA3B-D63EC4C36762} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{D6D739E0-AC0F-429C-B9F4-286AFE013770} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="StarBank"/>
-    <ROW Property="ProductVersion" Value="1.5" Type="32"/>
+    <ROW Property="ProductVersion" Value="1.6" Type="32"/>
     <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:ReallySuppress"/>
     <ROW Property="RUNAPPLICATION" Value="1" Type="4"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
