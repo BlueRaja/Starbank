@@ -14,7 +14,7 @@ namespace StarBank
 {
     public partial class MainForm : Form
     {
-        private BankInfoCache _bankInfoCache;
+        private BankInfoLoader _bankInfoLoader;
         private MapInfoCache _mapInfoCache;
         private IEnumerable<MapInfo> _mapList;
         private MapInfo _selectedMap;
@@ -26,8 +26,8 @@ namespace StarBank
         {
             InitializeComponent();
             splitContainer1.Visible = false;
-            _bankInfoCache = new BankInfoCache();
-            _mapInfoCache = new MapInfoCache(_bankInfoCache);
+            _bankInfoLoader = new BankInfoLoader();
+            _mapInfoCache = new MapInfoCache(_bankInfoLoader);
 
             //Create a progress bar and show it on the form
             _progressBarControl = new ProgressBarControl();
@@ -39,7 +39,7 @@ namespace StarBank
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            _bankInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
+            _bankInfoLoader.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             _mapInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             backgroundWorker1.RunWorkerAsync();
         }
@@ -273,17 +273,18 @@ namespace StarBank
                 //Read the bank
                 BankReader reader = new BankReader();
                 BankInfo bankInfo;
+                BankInfoCache bankInfoCache = new BankInfoCache();
                 if(!BankPathParser.IsValidBankPath(openFileDialog1.FileName))
                 {
                     PlayerNumberForm numberForm = new PlayerNumberForm();
                     if(numberForm.ShowDialog() != DialogResult.OK)
                         return;
-                    bankInfo = _bankInfoCache.GetBankInfoFromPath(openFileDialog1.FileName, numberForm.PlayerNumber,
+                    bankInfo = bankInfoCache.GetOrAddBankInfo(openFileDialog1.FileName, numberForm.PlayerNumber,
                                                                   numberForm.AuthorNumber);
                 }
                 else
                 {
-                    bankInfo =  _bankInfoCache.GetBankInfoFromPath(openFileDialog1.FileName);
+                    bankInfo = bankInfoCache.GetOrAddBankInfo(openFileDialog1.FileName);
                 }
                 Bank bank = reader.LoadBankFromPath(bankInfo);
 
@@ -310,7 +311,7 @@ namespace StarBank
             {
                 _isBankCacheLoaded = false;
                 _progressBarControl.Status = "Initializing bank cache (Step 1/2)";
-                _bankInfoCache.InitializeCache();
+                _bankInfoLoader.InitializeCache();
 
                 _isBankCacheLoaded = true;
                 _progressBarControl.Status = "Initializing map cache (Step 2/2)";

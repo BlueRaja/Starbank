@@ -34,7 +34,8 @@ namespace StarBank.Bank_Stuffs
         /// <returns></returns>
         public static bool IsValidBankPath(string bankPath)
         {
-            return IsValidPlayerOrAuthorNumber(GetAuthorNumber(bankPath))
+            return !String.IsNullOrEmpty(bankPath)
+                && IsValidPlayerOrAuthorNumber(GetAuthorNumber(bankPath))
                 && IsValidPlayerOrAuthorNumber(GetPlayerNumber(bankPath));
         }
 

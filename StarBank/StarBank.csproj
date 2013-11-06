@@ -75,6 +75,7 @@
     <Compile Include="Bank Stuffs\Bank.cs" />
     <Compile Include="Bank Stuffs\BankInfo.cs" />
     <Compile Include="Bank Stuffs\BankInfoCache.cs" />
+    <Compile Include="Bank Stuffs\BankInfoLoader.cs" />
     <Compile Include="Bank Stuffs\BankPathParser.cs" />
     <Compile Include="Bank Stuffs\BankReader.cs" />
     <Compile Include="Bank Stuffs\BankSignatureGenerator.cs" />
