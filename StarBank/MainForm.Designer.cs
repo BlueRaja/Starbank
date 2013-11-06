@@ -325,10 +325,6 @@
             this.aboutToolStripMenuItem.Text = "&About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
-            // openFileDialog1
-            // 
-            this.openFileDialog1.FileName = "openFileDialog1";
-            // 
             // lblMultipleBankFiles
             // 
             this.lblMultipleBankFiles.AutoSize = true;
