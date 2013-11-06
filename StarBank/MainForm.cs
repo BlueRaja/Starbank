@@ -47,7 +47,7 @@ namespace StarBank
 
         private void PopulateAccountComboBox()
         {
-            cmbAccount.Items.AddRange(_bankInfoLoader.GetAccountNumbers().ToArray());
+            cmbAccount.Items.AddRange(_bankInfoLoader.GetAccountNumbers().OrderBy(o => o).ToArray());
             if(cmbAccount.Items.Count > 0)
                 cmbAccount.SelectedIndex = 0;
             panelAccount.Visible = (cmbAccount.Items.Count > 1);
@@ -390,6 +390,32 @@ namespace StarBank
                                                e.ProgressPercentage*(100 - bankCachePercentage)/100;
             }
             _isReportingProgress = false;
+        }
+
+        private void cmbAccount_Format(object sender, ListControlConvertEventArgs e)
+        {
+            string accountNumber = (string)e.ListItem;
+            e.Value = String.Format("({0}) {1}", GetRegionName(accountNumber), accountNumber);
+        }
+
+        private static string GetRegionName(string accountNumber)
+        {
+            int regionNumber;
+            int.TryParse(accountNumber.Substring(0, 1), out regionNumber);
+
+            switch(regionNumber)
+            {
+                case 1:
+                    return "NA";
+                case 2:
+                    return "EU";
+                case 3:
+                    return "KOR";
+                case 6:
+                    return "SEA";
+                default:
+                    return "??";
+            }
         }
     }
 }

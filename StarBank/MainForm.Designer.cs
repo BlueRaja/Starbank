@@ -438,6 +438,7 @@
             this.cmbAccount.Size = new System.Drawing.Size(164, 21);
             this.cmbAccount.TabIndex = 9;
             this.cmbAccount.SelectedIndexChanged += new System.EventHandler(this.cmbAccount_SelectedIndexChanged);
+            this.cmbAccount.Format += new System.Windows.Forms.ListControlConvertEventHandler(this.cmbAccount_Format);
             // 
             // panelAccount
             // 
