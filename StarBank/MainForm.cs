@@ -41,16 +41,8 @@ namespace StarBank
         {
             _bankInfoLoader.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             _mapInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
-            PopulateAccountComboBox();
+            PopulateAccountMenu();
             backgroundWorker1.RunWorkerAsync();
-        }
-
-        private void PopulateAccountComboBox()
-        {
-            cmbAccount.Items.AddRange(_bankInfoLoader.GetAccountNumbers().OrderBy(o => o).ToArray());
-            if(cmbAccount.Items.Count > 0)
-                cmbAccount.SelectedIndex = 0;
-            panelAccount.Visible = (cmbAccount.Items.Count > 1);
         }
 
         private void listBox1_Format(object sender, ListControlConvertEventArgs e)
@@ -96,7 +88,8 @@ namespace StarBank
 
         private IEnumerable<BankInfo> GetApplicableBankInfos(MapInfo map)
         {
-            return map.BankInfos.Where(o => o.PlayerNumber == (string)cmbAccount.SelectedItem);
+            string accountNumber = GetSelectedAccountNumber();
+            return map.BankInfos.Where(o => o.PlayerNumber == accountNumber);
         }
 
         private void RefreshBankListView()
@@ -141,11 +134,6 @@ namespace StarBank
         }
 
         private void cbxCheckedChanged(object sender, EventArgs e)
-        {
-            RefreshListBox();
-        }
-
-        private void cmbAccount_SelectedIndexChanged(object sender, EventArgs e)
         {
             RefreshListBox();
         }
@@ -312,6 +300,39 @@ namespace StarBank
                 BankWriter bankWriter = new BankWriter();
                 bankWriter.WriteBank(bank, openFileDialog1.FileName);
             }
+        }
+
+        private void PopulateAccountMenu()
+        {
+            foreach (string accountNumber in _bankInfoLoader.GetAccountNumbers().OrderBy(o => o))
+            {
+                ToolStripMenuItem menuItem = new ToolStripMenuItem(accountNumber);
+                menuItem.Click += accountToolStripMenuItem_Click;
+                accountsToolStripMenuItem.DropDownItems.Add(menuItem);
+            }
+
+            if (accountsToolStripMenuItem.DropDownItems.Count > 0)
+            {
+                ((ToolStripMenuItem) accountsToolStripMenuItem.DropDownItems[0]).Checked = true;
+            }
+
+            accountsToolStripMenuItem.Visible = (accountsToolStripMenuItem.DropDownItems.Count > 1);
+        }
+
+        private void accountToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            foreach (ToolStripMenuItem menuItem in accountsToolStripMenuItem.DropDownItems)
+            {
+                menuItem.Checked = (menuItem == sender);
+            }
+            RefreshListBox();
+        }
+
+        private string GetSelectedAccountNumber()
+        {
+            return (from ToolStripMenuItem menuItem in accountsToolStripMenuItem.DropDownItems
+                    where menuItem.Checked
+                    select menuItem.Text).FirstOrDefault();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
