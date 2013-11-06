@@ -368,28 +368,24 @@ namespace StarBank
         private bool _isReportingProgress;
         private void DoReportProgress(int progressPercentage)
         {
-            _isReportingProgress = true;
             backgroundWorker1.ReportProgress(progressPercentage);
-            while(_isReportingProgress) //Set to false in backgroundWorker1_ProgressChanged
-            {
-                Thread.Sleep(1);
-            }
         }
 
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             //Make the bank-cache go from 0 to bankCachePercentage, then the map-cache go from bankCachePercentage to 100
             const int bankCachePercentage = 20;
+            int newProgress = 0;
             if(!_isBankCacheLoaded)
             {
-                _progressBarControl.Progress = e.ProgressPercentage*bankCachePercentage/100;
+                newProgress = e.ProgressPercentage*bankCachePercentage/100;
             }
             else
             {
-                _progressBarControl.Progress = bankCachePercentage +
+                newProgress = bankCachePercentage +
                                                e.ProgressPercentage*(100 - bankCachePercentage)/100;
             }
-            _isReportingProgress = false;
+            _progressBarControl.Progress = Math.Max(newProgress, _progressBarControl.Progress);
         }
 
         private void cmbAccount_Format(object sender, ListControlConvertEventArgs e)
