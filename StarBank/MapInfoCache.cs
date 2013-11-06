@@ -82,7 +82,7 @@ namespace StarBank
         /// </summary>
         private MapInfo GetMapInfo(FileInfo file, string galaxyScriptCode)
         {
-            string[] lines = galaxyScriptCode.Split('\n');
+            string[] lines = galaxyScriptCode.Substring(0, Math.Min(1000, galaxyScriptCode.Length)).Split('\n');
             if(lines.Length >= 6 && lines[4].StartsWith("// Name:"))
             {
                 string mapName = lines[4].Substring(10).Trim();
