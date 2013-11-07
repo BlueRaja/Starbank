@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using StarBank.Bank_Stuffs;
+using StarBank.Properties;
 
 namespace StarBank
 {
@@ -308,12 +309,17 @@ namespace StarBank
             {
                 ToolStripMenuItem menuItem = new ToolStripMenuItem(accountNumber);
                 menuItem.Click += accountToolStripMenuItem_Click;
+                Icon icon = GetAccountRegionIcon(accountNumber);
+                if(icon != null)
+                {
+                    menuItem.Image = icon.ToBitmap();
+                }
                 accountsToolStripMenuItem.DropDownItems.Add(menuItem);
             }
 
             if (accountsToolStripMenuItem.DropDownItems.Count > 0)
             {
-                ((ToolStripMenuItem) accountsToolStripMenuItem.DropDownItems[0]).Checked = true;
+                accountsToolStripMenuItem.DropDownItems[0].PerformClick();
             }
 
             accountsToolStripMenuItem.Visible = (accountsToolStripMenuItem.DropDownItems.Count > 1);
@@ -324,6 +330,7 @@ namespace StarBank
             foreach (ToolStripMenuItem menuItem in accountsToolStripMenuItem.DropDownItems)
             {
                 menuItem.Checked = (menuItem == sender);
+                menuItem.BackColor = (menuItem == sender ? SystemColors.ControlLight : SystemColors.Control);
             }
             RefreshListBox();
         }
@@ -409,13 +416,7 @@ namespace StarBank
             _progressBarControl.Progress = Math.Max(newProgress, _progressBarControl.Progress);
         }
 
-        private void cmbAccount_Format(object sender, ListControlConvertEventArgs e)
-        {
-            string accountNumber = (string)e.ListItem;
-            e.Value = String.Format("({0}) {1}", GetRegionName(accountNumber), accountNumber);
-        }
-
-        private static string GetRegionName(string accountNumber)
+        private static Icon GetAccountRegionIcon(string accountNumber)
         {
             int regionNumber;
             int.TryParse(accountNumber.Substring(0, 1), out regionNumber);
@@ -423,15 +424,15 @@ namespace StarBank
             switch(regionNumber)
             {
                 case 1:
-                    return "NA";
+                    return Resources.USA;
                 case 2:
-                    return "EU";
+                    return Resources.EU;
                 case 3:
-                    return "KOR";
+                    return Resources.KOR;
                 case 6:
-                    return "SEA";
+                    return Resources.SEA;
                 default:
-                    return "??";
+                    return null;
             }
         }
     }
