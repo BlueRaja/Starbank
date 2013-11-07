@@ -136,4 +136,16 @@
   <data name="StarBank" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\StarBank.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="EU" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\EU.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="KOR" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\KOR.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SEA" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\SEA.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="USA" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\images\USA.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
