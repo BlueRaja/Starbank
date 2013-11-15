@@ -32,18 +32,17 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.mapFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openMapFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveMapAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.triggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openGalaxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveGalaxyToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.bankFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openBankToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openBankFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveBankAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.triggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openGalaxyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveGalaxyToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mapFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openMapFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveMapAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblMapName = new System.Windows.Forms.Label();
             this.lblAuthor = new System.Windows.Forms.Label();
             this.lblLastUpdate = new System.Windows.Forms.Label();
@@ -95,73 +94,13 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mapFileToolStripMenuItem,
-            this.bankFileToolStripMenuItem});
+            this.bankFileToolStripMenuItem,
+            this.triggerToolStripMenuItem,
+            this.mapFileToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(122, 48);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 92);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             this.contextMenuStrip1.Opened += new System.EventHandler(this.contextMenuStrip1_Opened);
-            // 
-            // mapFileToolStripMenuItem
-            // 
-            this.mapFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openMapToolStripMenuItem,
-            this.openMapFolderToolStripMenuItem,
-            this.saveMapAsToolStripMenuItem,
-            this.toolStripSeparator2,
-            this.triggerToolStripMenuItem});
-            this.mapFileToolStripMenuItem.Name = "mapFileToolStripMenuItem";
-            this.mapFileToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
-            this.mapFileToolStripMenuItem.Text = "&Map File";
-            // 
-            // openMapToolStripMenuItem
-            // 
-            this.openMapToolStripMenuItem.Name = "openMapToolStripMenuItem";
-            this.openMapToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.openMapToolStripMenuItem.Text = "&Open";
-            this.openMapToolStripMenuItem.Click += new System.EventHandler(this.openMapToolStripMenuItem_Click);
-            // 
-            // openMapFolderToolStripMenuItem
-            // 
-            this.openMapFolderToolStripMenuItem.Name = "openMapFolderToolStripMenuItem";
-            this.openMapFolderToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.openMapFolderToolStripMenuItem.Text = "Open &Folder";
-            this.openMapFolderToolStripMenuItem.Click += new System.EventHandler(this.openMapFolderToolStripMenuItem_Click);
-            // 
-            // saveMapAsToolStripMenuItem
-            // 
-            this.saveMapAsToolStripMenuItem.Name = "saveMapAsToolStripMenuItem";
-            this.saveMapAsToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.saveMapAsToolStripMenuItem.Text = "&Save As...";
-            this.saveMapAsToolStripMenuItem.Click += new System.EventHandler(this.saveMapToToolStripMenuItem_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(188, 6);
-            // 
-            // triggerToolStripMenuItem
-            // 
-            this.triggerToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openGalaxyToolStripMenuItem,
-            this.saveGalaxyToToolStripMenuItem});
-            this.triggerToolStripMenuItem.Name = "triggerToolStripMenuItem";
-            this.triggerToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
-            this.triggerToolStripMenuItem.Text = "&Galaxyscript (Triggers)";
-            // 
-            // openGalaxyToolStripMenuItem
-            // 
-            this.openGalaxyToolStripMenuItem.Name = "openGalaxyToolStripMenuItem";
-            this.openGalaxyToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.openGalaxyToolStripMenuItem.Text = "&Open";
-            this.openGalaxyToolStripMenuItem.Click += new System.EventHandler(this.openGalaxyToolStripMenuItem_Click);
-            // 
-            // saveGalaxyToToolStripMenuItem
-            // 
-            this.saveGalaxyToToolStripMenuItem.Name = "saveGalaxyToToolStripMenuItem";
-            this.saveGalaxyToToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
-            this.saveGalaxyToToolStripMenuItem.Text = "&Save To...";
-            this.saveGalaxyToToolStripMenuItem.Click += new System.EventHandler(this.saveGalaxyToToolStripMenuItem_Click);
             // 
             // bankFileToolStripMenuItem
             // 
@@ -170,7 +109,7 @@
             this.openBankFolderToolStripMenuItem,
             this.saveBankAsToolStripMenuItem});
             this.bankFileToolStripMenuItem.Name = "bankFileToolStripMenuItem";
-            this.bankFileToolStripMenuItem.Size = new System.Drawing.Size(121, 22);
+            this.bankFileToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
             this.bankFileToolStripMenuItem.Text = "&Bank File";
             // 
             // openBankToolStripMenuItem
@@ -193,6 +132,60 @@
             this.saveBankAsToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
             this.saveBankAsToolStripMenuItem.Text = "Save As...";
             this.saveBankAsToolStripMenuItem.Click += new System.EventHandler(this.saveBankToToolStripMenuItem_Click);
+            // 
+            // triggerToolStripMenuItem
+            // 
+            this.triggerToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openGalaxyToolStripMenuItem,
+            this.saveGalaxyToToolStripMenuItem});
+            this.triggerToolStripMenuItem.Name = "triggerToolStripMenuItem";
+            this.triggerToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.triggerToolStripMenuItem.Text = "&Galaxyscript Code";
+            // 
+            // openGalaxyToolStripMenuItem
+            // 
+            this.openGalaxyToolStripMenuItem.Name = "openGalaxyToolStripMenuItem";
+            this.openGalaxyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.openGalaxyToolStripMenuItem.Text = "&Open";
+            this.openGalaxyToolStripMenuItem.Click += new System.EventHandler(this.openGalaxyToolStripMenuItem_Click);
+            // 
+            // saveGalaxyToToolStripMenuItem
+            // 
+            this.saveGalaxyToToolStripMenuItem.Name = "saveGalaxyToToolStripMenuItem";
+            this.saveGalaxyToToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveGalaxyToToolStripMenuItem.Text = "&Save To...";
+            this.saveGalaxyToToolStripMenuItem.Click += new System.EventHandler(this.saveGalaxyToToolStripMenuItem_Click);
+            // 
+            // mapFileToolStripMenuItem
+            // 
+            this.mapFileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openMapToolStripMenuItem,
+            this.openMapFolderToolStripMenuItem,
+            this.saveMapAsToolStripMenuItem});
+            this.mapFileToolStripMenuItem.Name = "mapFileToolStripMenuItem";
+            this.mapFileToolStripMenuItem.Size = new System.Drawing.Size(168, 22);
+            this.mapFileToolStripMenuItem.Text = "&Map File";
+            // 
+            // openMapToolStripMenuItem
+            // 
+            this.openMapToolStripMenuItem.Name = "openMapToolStripMenuItem";
+            this.openMapToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.openMapToolStripMenuItem.Text = "&Open";
+            this.openMapToolStripMenuItem.Click += new System.EventHandler(this.openMapToolStripMenuItem_Click);
+            // 
+            // openMapFolderToolStripMenuItem
+            // 
+            this.openMapFolderToolStripMenuItem.Name = "openMapFolderToolStripMenuItem";
+            this.openMapFolderToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.openMapFolderToolStripMenuItem.Text = "Open &Folder";
+            this.openMapFolderToolStripMenuItem.Click += new System.EventHandler(this.openMapFolderToolStripMenuItem_Click);
+            // 
+            // saveMapAsToolStripMenuItem
+            // 
+            this.saveMapAsToolStripMenuItem.Name = "saveMapAsToolStripMenuItem";
+            this.saveMapAsToolStripMenuItem.Size = new System.Drawing.Size(139, 22);
+            this.saveMapAsToolStripMenuItem.Text = "&Save As...";
+            this.saveMapAsToolStripMenuItem.Click += new System.EventHandler(this.saveMapToToolStripMenuItem_Click);
             // 
             // lblMapName
             // 
@@ -277,7 +270,7 @@
             // exitToolStripMenuItem
             // 
             this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(92, 22);
+            this.exitToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.exitToolStripMenuItem.Text = "&Exit";
             this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -458,13 +451,9 @@
         private System.Windows.Forms.ToolStripMenuItem openMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openMapFolderToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveMapAsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem triggerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bankFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openBankToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openBankFolderToolStripMenuItem;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripMenuItem openGalaxyToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem saveGalaxyToToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveBankAsToolStripMenuItem;
         private System.Windows.Forms.CheckBox cbxHideBlizzard;
         private System.Windows.Forms.CheckBox cbxHideMapsWithoutBank;
@@ -486,6 +475,9 @@
         private System.Windows.Forms.Label label1;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.ToolStripMenuItem accountsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem triggerToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem openGalaxyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveGalaxyToToolStripMenuItem;
 
     }
 }
