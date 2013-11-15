@@ -87,8 +87,21 @@ namespace StarBank
 
         private void cb_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ComboBox cb = (ComboBox)sender;
-            ((Bank.Key)cb.Tag).Type = (string) cb.SelectedItem;
+            ComboBox cb = (ComboBox) sender;
+            Bank.Key key = (Bank.Key) cb.Tag;
+            string newType = (string) cb.SelectedItem;
+
+            if(CheckForValidTypeAndValue(newType, key.Value))
+            {
+                ((Bank.Key)cb.Tag).Type = newType; 
+            }
+            else
+            {
+                //Temporary disable this event to avoid infinite-recursion, in the unlikely event that the initial value was invalid!
+                cb.SelectedIndexChanged -= cb_SelectedIndexChanged;
+                cb.SelectedItem = key.Type;
+                cb.SelectedIndexChanged += cb_SelectedIndexChanged;
+            }
         }
 
         private void objectListView1_CellEditFinishing(object sender, CellEditEventArgs e)
@@ -129,14 +142,20 @@ namespace StarBank
             if(e.Column == columnValue)
             {
                 Bank.Key key = (Bank.Key) e.RowObject;
-                if(!IsValidKeyValue(key.Type, (string) e.NewValue))
-                {
-                    MessageBox.Show("Invalid entry for type: " + key.Type, "Invalid entry", MessageBoxButtons.OK,
-                                    MessageBoxIcon.Error);
-                    e.Cancel = true;
-                    objectListView1.CancelCellEdit();
-                }
+                e.Cancel = !CheckForValidTypeAndValue(key.Type, (string) e.NewValue);
             }
+        }
+
+        private bool CheckForValidTypeAndValue(string type, string value)
+        {
+            if(IsValidKeyValue(type, value))
+            {
+                return true;
+            }
+
+            MessageBox.Show("Invalid entry for type: " + type, "Invalid entry", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            objectListView1.CancelCellEdit();
+            return false;
         }
 
         private bool IsValidKeyValue(string type, string value)
