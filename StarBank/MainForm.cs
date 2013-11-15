@@ -167,13 +167,10 @@ namespace StarBank
 
         private void openMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(_selectedMap.IsProtected)
-            {
-                MessageBox.Show(
-                    "This map is protected; opening it may not work correctly.\n\nTo unprotect it, use \"Save As...\" instead.",
-                    "Protected map", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            _explorerHelper.OpenFile(_selectedMap.CachePath);
+            //Copy the map to a temp-folder first so we can un-protect it
+            string newLocation = Path.Combine(Path.GetTempPath(), _explorerHelper.GetFileSafeName(_selectedMap.Name) + ".SC2Map");
+            CopyMap(_selectedMap.CachePath, newLocation);
+            _explorerHelper.OpenFile(newLocation);
         }
 
         private void openMapFolderToolStripMenuItem_Click(object sender, EventArgs e)
@@ -199,12 +196,17 @@ namespace StarBank
                     if(result == DialogResult.Yes)
                         unprotectMap = true;
                 }
-                File.Copy(_selectedMap.CachePath, saveFileDialog1.FileName, true);
-                if(unprotectMap)
-                {
-                    MapProtection mapProtection = new MapProtection();
-                    mapProtection.UnprotectMap(saveFileDialog1.FileName);
-                }
+                CopyMap(_selectedMap.CachePath, saveFileDialog1.FileName, unprotectMap);
+            }
+        }
+
+        private void CopyMap(string oldLocation, string newLocation, bool unprotectMap = true)
+        {
+            File.Copy(oldLocation, newLocation, true);
+            if (unprotectMap)
+            {
+                MapProtection mapProtection = new MapProtection();
+                mapProtection.UnprotectMap(newLocation);
             }
         }
 
