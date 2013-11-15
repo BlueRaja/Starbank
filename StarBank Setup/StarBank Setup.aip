@@ -4,17 +4,17 @@
     <ROW Property="AI_BITMAP_DISPLAY_MODE" Value="0"/>
     <ROW Property="AI_MINDOTNETVERSION" MultiBuildValue="DefaultBuild:4.5" ValueLocId="-"/>
     <ROW Property="ALLUSERS" Value="1"/>
-    <ROW Property="ARPCOMMENTS" Value="This installer database contains the logic and data required to install [|ProductName]." ValueLocId="*"/>
+    <ROW Property="ARPCOMMENTS" Value="This is the installation file for [|ProductName]." ValueLocId="*"/>
     <ROW Property="ARPNOMODIFY" MultiBuildValue="DefaultBuild:1"/>
     <ROW Property="ARPPRODUCTICON" Value="StarBank.exe" Type="8"/>
     <ROW Property="ARPURLINFOABOUT" Value="http://www.d3scene.com/forum/starcraft-2-custom-maps/67976-starbank-starcraft-ii-bank-file-editor-alpha.html"/>
     <ROW Property="CTRLS" Value="2"/>
     <ROW Property="MSIFASTINSTALL" MultiBuildValue="DefaultBuild:3"/>
     <ROW Property="Manufacturer" Value="BlueRaja"/>
-    <ROW Property="ProductCode" Value="1033:{DC0D2A1A-2872-4899-972A-3C102AA1A408} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{D6422A73-665E-46C9-953D-7E3206486473} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
     <ROW Property="ProductName" Value="StarBank"/>
-    <ROW Property="ProductVersion" Value="1.6.1" Type="32"/>
+    <ROW Property="ProductVersion" Value="1.6.2" Type="32"/>
     <ROW Property="REBOOT" MultiBuildValue="DefaultBuild:ReallySuppress"/>
     <ROW Property="RUNAPPLICATION" Value="1" Type="4"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND"/>
