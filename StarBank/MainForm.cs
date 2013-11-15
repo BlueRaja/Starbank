@@ -199,7 +199,7 @@ namespace StarBank
                     if(result == DialogResult.Yes)
                         unprotectMap = true;
                 }
-                File.Copy(_selectedMap.CachePath, saveFileDialog1.FileName);
+                File.Copy(_selectedMap.CachePath, saveFileDialog1.FileName, true);
                 if(unprotectMap)
                 {
                     MapProtection mapProtection = new MapProtection();
