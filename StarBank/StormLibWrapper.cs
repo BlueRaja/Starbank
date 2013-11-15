@@ -48,10 +48,10 @@ namespace StarBank
         [Flags]
         private enum OpenArchiveFlags
         {
-            DontReadListFile = 0x0010,
-            DontReadAttributesFile = 0x0020,
-            VerifyCrc = 0x0080,
-            ReadOnly = 0x0100
+            DontReadListFile = 0x00010000,
+            DontReadAttributesFile = 0x00020000,
+            VerifyCrc = 0x00080000,
+            ReadOnly = 0x00000100
         }
         #endregion
 
