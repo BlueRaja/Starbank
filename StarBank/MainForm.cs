@@ -109,7 +109,8 @@ namespace StarBank
             {
                 //Refresh the bank also
                 BankReader bankReader = new BankReader();
-                _selectedMapBank = (_selectedMap.BankInfos.Any()
+                string accountNumber = GetSelectedAccountNumber();
+                _selectedMapBank = (_selectedMap.BankInfos.Any(o => o.PlayerNumber == accountNumber)
                                         ? bankReader.LoadBankFromPath((BankInfo) cmbBankFile.SelectedItem)
                                         : null);
                 bankEditor1.Bank = _selectedMapBank;
