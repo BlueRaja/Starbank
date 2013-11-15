@@ -15,6 +15,7 @@ namespace StarBank
     public partial class BankEditor : UserControl
     {
         private Bank _bank;
+        private bool _hasBeenEdited;
 
         public Bank Bank
         {
@@ -92,6 +93,7 @@ namespace StarBank
 
         private void objectListView1_CellEditFinishing(object sender, CellEditEventArgs e)
         {
+            _hasBeenEdited = true;
             if(e.Column == columnType)
             {
                 // Stop listening for change events
@@ -104,9 +106,20 @@ namespace StarBank
                 // We have updated the model object, so we cancel the auto update
                 e.Cancel = true;
             }
+        }
 
-            //Save the results right away
-            SaveBank();
+        private void objectListView1_FormatRow(object sender, FormatRowEventArgs e)
+        {
+            //This is a bit of a hack - CellEditFinishing gets called BEFORE the model is updated, meaning changes to
+            // values won't actually get saved immediately.  This is the only other event that is called after editing a cell
+            // (not even FormatCell is called - lolwut)
+            //However, it is also called in a lot of other cases, so to prevent excess disk I/O, we have to manually keep track of when
+            // the cell was actually edited.
+            if(_hasBeenEdited)
+            {
+                _hasBeenEdited = false;
+                SaveBank();
+            }
         }
         #endregion
 
