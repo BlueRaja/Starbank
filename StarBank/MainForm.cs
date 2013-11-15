@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -43,6 +45,7 @@ namespace StarBank
             _bankInfoLoader.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             _mapInfoCache.ProgressChanged += (a, args) => DoReportProgress(args.ProgressPercentage);
             PopulateAccountMenu();
+            SetTitleBar();
             backgroundWorker1.RunWorkerAsync();
         }
 
@@ -323,6 +326,18 @@ namespace StarBank
             }
 
             accountsToolStripMenuItem.Visible = (accountsToolStripMenuItem.DropDownItems.Count > 1);
+        }
+
+        private void SetTitleBar()
+        {
+            this.Text += " (v" + GetVersionNumber() + ")";
+        }
+
+        private string GetVersionNumber()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            return versionInfo.ProductVersion;
         }
 
         private void accountToolStripMenuItem_Click(object sender, EventArgs e)
