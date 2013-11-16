@@ -144,12 +144,7 @@ namespace StarBank
         }
 
         #region Context menu
-        private ExplorerHelper _explorerHelper = new ExplorerHelper();
-
-        private void contextMenuStrip1_Opened(object sender, EventArgs e)
-        {
-            openMapToolStripMenuItem.Image = (_selectedMap.IsProtected ? Properties.Resources.lockIcon : null);
-        }
+        private readonly ExplorerHelper _explorerHelper = new ExplorerHelper();
 
         private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
         {

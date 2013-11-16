@@ -121,9 +121,6 @@
   <data name="ComponentList" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ComponentList.SC2Components;System.Byte[], mscorlib, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="lockIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\lock.png;System.Drawing.Bitmap, System.Drawing, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="Triggers" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Triggers;System.Byte[], mscorlib, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

@@ -169,9 +169,6 @@
     <None Include="Resources\Triggers.version" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\lock.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\PlayerNumber.png" />
   </ItemGroup>
   <ItemGroup>
