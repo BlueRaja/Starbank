@@ -110,7 +110,7 @@ namespace StarBank
                 //Refresh the bank also
                 BankReader bankReader = new BankReader();
                 string accountNumber = GetSelectedAccountNumber();
-                _selectedMapBank = (_selectedMap.BankInfos.Any(o => o.PlayerNumber == accountNumber)
+                _selectedMapBank = (GetApplicableBankInfos(_selectedMap).Any()
                                         ? bankReader.LoadBankFromPath((BankInfo) cmbBankFile.SelectedItem)
                                         : null);
                 bankEditor1.Bank = _selectedMapBank;
@@ -162,6 +162,8 @@ namespace StarBank
             else
             {
                 listBox1.SelectedIndex = listBoxIndex;
+                //_selectedMap will be set here by listBox1_SelectedIndexChanged
+                bankFileToolStripMenuItem.Enabled = GetApplicableBankInfos(_selectedMap).Any();
             }
         }
 
@@ -230,22 +232,22 @@ namespace StarBank
 
         private void openBankToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _explorerHelper.OpenFile(_selectedMap.BankInfos.First().BankPath);
+            _explorerHelper.OpenFile(GetApplicableBankInfos(_selectedMap).First().BankPath);
         }
 
         private void openBankFolderToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _explorerHelper.OpenFolder(_selectedMap.BankInfos.First().BankPath);
+            _explorerHelper.OpenFolder(GetApplicableBankInfos(_selectedMap).First().BankPath);
         }
 
         private void saveBankToToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            saveFileDialog1.FileName = _explorerHelper.GetFileSafeName(_selectedMap.BankInfos.First().Name) + ".SC2Bank";
+            saveFileDialog1.FileName = _explorerHelper.GetFileSafeName(GetApplicableBankInfos(_selectedMap).First().Name) + ".SC2Bank";
             saveFileDialog1.Title = "Save bank file to...";
             saveFileDialog1.Filter = "Starcraft 2 Bank File (*.SC2Bank)|*.SC2Bank";
             if(saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                File.Copy(_selectedMap.BankInfos.First().BankPath, saveFileDialog1.FileName);
+                File.Copy(GetApplicableBankInfos(_selectedMap).First().BankPath, saveFileDialog1.FileName);
             }
         }
         #endregion
