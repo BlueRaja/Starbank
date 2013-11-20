@@ -29,7 +29,10 @@ namespace StarBank
         {
             using(StormLibWrapper.MpqArchive mapArchive = new StormLibWrapper.MpqArchive(fileName, false))
             {
-                UnprotectMap(mapArchive);
+                if(IsMapProtected(mapArchive))
+                {
+                    UnprotectMap(mapArchive);
+                }
             }
         }
 
