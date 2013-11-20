@@ -96,6 +96,13 @@ namespace StarBank
             return map.BankInfos.Where(o => o.PlayerNumber == accountNumber);
         }
 
+        private string GetSelectedAccountNumber()
+        {
+            return (from ToolStripMenuItem menuItem in accountsToolStripMenuItem.DropDownItems
+                    where menuItem.Checked
+                    select menuItem.Text).FirstOrDefault();
+        }
+
         private void RefreshBankListView()
         {
             if(_selectedMap == null)
@@ -109,7 +116,6 @@ namespace StarBank
             {
                 //Refresh the bank also
                 BankReader bankReader = new BankReader();
-                string accountNumber = GetSelectedAccountNumber();
                 _selectedMapBank = (GetApplicableBankInfos(_selectedMap).Any()
                                         ? bankReader.LoadBankFromPath((BankInfo) cmbBankFile.SelectedItem)
                                         : null);
@@ -348,13 +354,6 @@ namespace StarBank
                 menuItem.BackColor = (menuItem == sender ? SystemColors.ControlLight : SystemColors.Control);
             }
             RefreshListBox();
-        }
-
-        private string GetSelectedAccountNumber()
-        {
-            return (from ToolStripMenuItem menuItem in accountsToolStripMenuItem.DropDownItems
-                    where menuItem.Checked
-                    select menuItem.Text).FirstOrDefault();
         }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
