@@ -174,7 +174,7 @@ namespace StarBank
             /// </summary>
             public string ReadString(int numCharsToRead)
             {
-                return Encoding.ASCII.GetString(Read(numCharsToRead));
+                return Encoding.UTF8.GetString(Read(numCharsToRead));
             }
 
 

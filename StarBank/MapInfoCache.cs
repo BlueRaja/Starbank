@@ -105,26 +105,41 @@ namespace StarBank
         /// </summary>
         private MapInfo GetMapInfo(FileInfo file, string galaxyScriptCode)
         {
-            string[] lines = galaxyScriptCode.Substring(0, Math.Min(1000, galaxyScriptCode.Length)).Split('\n');
-            if(lines.Length >= 6 && lines[4].StartsWith("// Name:"))
+            MapInfo mapInfo = GetMapInfoFromGalaxyScript(file, galaxyScriptCode);
+            if(mapInfo == null)
             {
-                string mapName = lines[4].Substring(10).Trim();
-                if(!string.IsNullOrEmpty(mapName))
-                {
-                    //Hack:  The map-name and author name are listed as comments in the galaxy-script file
-                    //Open that file, find the comments, and read them
-                    MapInfo mapInfo = new MapInfo();
-                    mapInfo.CachePath = file.FullName;
-                    mapInfo.DateCreated = file.LastWriteTime;
-                    mapInfo.Name = mapName;
-                    mapInfo.AuthorName = (lines[5].StartsWith("// Author:") ? lines[5].Substring(10).Trim() : "(Unknown)");
-                    return mapInfo;
-                }
+                //Use the document-header name in cases where we can't find it in the galaxyscript file
+                //Usually this name is uglier (and is sometimes filled with garbage??), so we only want to use it if we have to
+                mapInfo = GetMapInfoFromDocumentHeader(file);
+            }
+            // Non-ascii strings contain "?" in the Galaxyscript name
+            else if(String.IsNullOrEmpty(mapInfo.Name) || mapInfo.Name.Contains("?"))
+            {
+                mapInfo.Name = GetMapInfoFromDocumentHeader(file).Name;
             }
 
-            //Use the document-header name in cases where we can't find it in the galaxyscript file
-            //Usually this name is uglier (and is sometimes filled with garbage??), so we only want to use it if we have to
-            return GetMapInfoFromDocumentHeader(file);
+            if(mapInfo != null && String.IsNullOrEmpty(mapInfo.AuthorName))
+            {
+                mapInfo.AuthorName = "(unknown)";
+            }
+
+            return mapInfo;
+        }
+
+        private MapInfo GetMapInfoFromGalaxyScript(FileInfo file, string galaxyScriptCode)
+        {
+            string[] lines = galaxyScriptCode.Substring(0, Math.Min(1000, galaxyScriptCode.Length)).Split('\n');
+            if (lines.Length < 6)
+            {
+                return null;
+            }
+
+            MapInfo mapInfo = new MapInfo();
+            mapInfo.CachePath = file.FullName;
+            mapInfo.DateCreated = file.LastWriteTime;
+            mapInfo.Name = lines[4].StartsWith("// Name:") ? lines[4].Substring(10).Trim() : null;
+            mapInfo.AuthorName = (lines[5].StartsWith("// Author:") ? lines[5].Substring(10).Trim() : null);
+            return mapInfo;
         }
 
         /// <summary>
