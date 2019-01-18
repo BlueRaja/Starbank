@@ -79,7 +79,7 @@ namespace StarBank
             cb.Font = ((ObjectListView)sender).Font;
             cb.DropDownStyle = ComboBoxStyle.DropDownList;
             cb.Items.AddRange(new string[] { "fixed", "flag", "int", "point", "string", "text", "unit" });
-            cb.SelectedItem = ((Bank.Key) e.RowObject).Type;
+            cb.SelectedItem = ((Bank.Key) e.RowObject).Items[0].Type;
             cb.SelectedIndexChanged += cb_SelectedIndexChanged;
             cb.Tag = e.RowObject;
             e.Control = cb;
@@ -91,15 +91,15 @@ namespace StarBank
             Bank.Key key = (Bank.Key) cb.Tag;
             string newType = (string) cb.SelectedItem;
 
-            if(CheckForValidTypeAndValue(newType, key.Value))
+            if(CheckForValidTypeAndValue(newType, key.Items[0].Value))
             {
-                ((Bank.Key)cb.Tag).Type = newType; 
+                ((Bank.Key)cb.Tag).Items[0].Type = newType; 
             }
             else
             {
                 //Temporary disable this event to avoid infinite-recursion, in the unlikely event that the initial value was invalid!
                 cb.SelectedIndexChanged -= cb_SelectedIndexChanged;
-                cb.SelectedItem = key.Type;
+                cb.SelectedItem = key.Items[0].Type;
                 cb.SelectedIndexChanged += cb_SelectedIndexChanged;
             }
         }
@@ -108,6 +108,7 @@ namespace StarBank
         {
             _hasBeenEdited = true;
 
+           
             if(e.Column == columnType)
             {
                 // Stop listening for change events
@@ -142,7 +143,7 @@ namespace StarBank
             if(e.Column == columnValue)
             {
                 Bank.Key key = (Bank.Key) e.RowObject;
-                e.Cancel = !CheckForValidTypeAndValue(key.Type, (string) e.NewValue);
+                e.Cancel = !CheckForValidTypeAndValue(key.Items[0].Type, (string) e.NewValue);
             }
         }
 
@@ -200,8 +201,8 @@ namespace StarBank
                 Bank.Key bankKey = new Bank_Stuffs.Bank.Key();
                 bankKey.Name = newSectionItemForm.ItemName;
                 bankKey.Section = selectedSection;
-                bankKey.Type = "string";
-                bankKey.Value = "";
+                bankKey.Items[0].Type = "string";
+                bankKey.Items[0].Value = "";
                 selectedSection.Keys.Add(bankKey);
                 SaveBank();
                 RefreshBankProperties();

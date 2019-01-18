@@ -51,9 +51,27 @@ namespace StarBank.Bank_Stuffs
 
         private XElement CreateKey(Bank.Key key)
         {
-            return new XElement("Key", new XAttribute("name", key.Name),
-                                new XElement("Value", new XAttribute(key.Type, key.Value)));
+            
+            return new XElement("Key", new XAttribute("name", key.Name), CreateItems(key.Items));
         }
+
+        private XElement[] CreateItems(IEnumerable<Bank.Item> items)
+        {
+            IList<XElement> itemElements = new List<XElement>();
+            foreach (var item in items)
+            {
+                itemElements.Add(CreateItem(item));
+            }
+            return itemElements.ToArray();
+        }
+
+        private XElement CreateItem(Bank.Item item)
+        {
+
+            return new XElement(item.Name, new XAttribute(item.Type, item.Value));
+        }
+
+
 
         private XElement CreateSignature(Bank bank)
         {

@@ -24,10 +24,13 @@ namespace StarBank.Bank_Stuffs
                 //And between those, each key-name/value
                 foreach(Bank.Key key in section.Keys.OrderBy(o => o.Name, StringComparer.Ordinal))
                 {
-                    inputString.Append(key.Name);
-                    inputString.Append("Value");
-                    inputString.Append(key.Type);
-                    inputString.Append(key.Value);
+                    foreach(var item in key.Items)
+                    {
+                        inputString.Append(key.Name);
+                        inputString.Append(item.Name);
+                        inputString.Append(item.Type);
+                        inputString.Append(item.Value);
+                    }
                 }
             }
 

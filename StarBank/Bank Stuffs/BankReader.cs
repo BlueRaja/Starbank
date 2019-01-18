@@ -56,16 +56,18 @@ namespace StarBank.Bank_Stuffs
                         key.Name = nameAttribute.Value;
 
                     //Key type/value are stored in the attributes of a single child "Value" node
-                    var valueNode = keyNode.Descendants("Value").FirstOrDefault();
-                    if(valueNode != null)
+
+                    foreach(var item in keyNode.Descendants())
                     {
-                        var valueAttribute = valueNode.Attributes().FirstOrDefault();
-                        if(valueAttribute != null)
-                        {
-                            key.Type = valueAttribute.Name.ToString();
-                            key.Value = valueAttribute.Value;
-                        }
+                        var valueAttribute = item.Attributes().FirstOrDefault();
+                        var tag = item.Name.ToString();
+                        var type = valueAttribute.Name.ToString();
+                        var value = valueAttribute.Value;
+                        key.Items.Add(new Bank.Item { Name = tag, Type = type, Value = value });
                     }
+                   
+
+
                 }
             }
 
