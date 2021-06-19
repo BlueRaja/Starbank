@@ -115,7 +115,7 @@ namespace StarBank
             // Non-ascii strings contain "?" in the Galaxyscript name
             else if(String.IsNullOrEmpty(mapInfo.Name) || mapInfo.Name.Contains("?"))
             {
-                mapInfo.Name = GetMapInfoFromDocumentHeader(file).Name;
+                mapInfo.Name = GetMapInfoFromDocumentHeader(file)?.Name ?? "(unknown)";
             }
 
             if(mapInfo != null && String.IsNullOrEmpty(mapInfo.AuthorName))
