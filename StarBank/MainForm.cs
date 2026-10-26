@@ -24,6 +24,10 @@ namespace StarBank
         private Bank _selectedMapBank;
         private ProgressBarControl _progressBarControl;
         private bool _isBankCacheLoaded; //Used to help set the progress bar to a proper length
+        private BankBackupManager _bankBackupManager;
+
+        //Banks already backed up automatically during this session, before their first edit
+        private readonly HashSet<string> _automaticallyBackedUpBanks = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         public MainForm()
         {
@@ -31,6 +35,9 @@ namespace StarBank
             splitContainer1.Visible = false;
             _bankInfoLoader = new BankInfoLoader();
             _mapInfoCache = new MapInfoCache(_bankInfoLoader);
+            _bankBackupManager = new BankBackupManager(_bankInfoLoader.BanksFolder, Path.Combine(StarBankDataFolder.Location, "Backups"));
+            bankEditor1.BankSaving += bankEditor1_BankSaving;
+            bankEditor1.BankSaved += bank => RefreshBackupStatus();
 
             //Create a progress bar and show it on the form
             _progressBarControl = new ProgressBarControl();
@@ -52,7 +59,16 @@ namespace StarBank
         private void listBox1_Format(object sender, ListControlConvertEventArgs e)
         {
             MapInfo mapInfo = (MapInfo) e.ListItem;
-            e.Value = mapInfo.Name;
+            //Maps with a bank that was never backed up are marked at the start of the name, so the marker is visible in a narrow list
+            e.Value = (HasBankWithoutBackup(mapInfo) ? "[!] " : "") + mapInfo.Name;
+        }
+
+        /// <summary>
+        /// True if the map has bank files (for the selected account), and at least one of them has never been backed up
+        /// </summary>
+        private bool HasBankWithoutBackup(MapInfo map)
+        {
+            return GetApplicableBankInfos(map).Any(o => !_bankBackupManager.HasBackup(o.BankPath));
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -121,6 +137,24 @@ namespace StarBank
                                         : null);
                 bankEditor1.Bank = _selectedMapBank;
             }
+            RefreshBackupStatus();
+        }
+
+        /// <summary>
+        /// Re-adds all maps to the list (so their "[!]" no-backup markers are updated), keeping the selected map and bank
+        /// </summary>
+        private void RefreshListBoxKeepingSelection()
+        {
+            MapInfo selectedMap = _selectedMap;
+            BankInfo selectedBank = cmbBankFile.SelectedItem as BankInfo;
+            RefreshListBox();
+            if(selectedMap != null && listBox1.Items.Contains(selectedMap))
+            {
+                listBox1.SelectedItem = selectedMap;
+                if(selectedBank != null && cmbBankFile.Items.Contains(selectedBank))
+                    cmbBankFile.SelectedItem = selectedBank;
+            }
+            RefreshBackupStatus();
         }
 
         private void RefreshListBox()
@@ -165,6 +199,8 @@ namespace StarBank
                 listBox1.SelectedIndex = listBoxIndex;
                 //_selectedMap will be set here by listBox1_SelectedIndexChanged
                 bankFileToolStripMenuItem.Enabled = GetApplicableBankInfos(_selectedMap).Any();
+                backupMapToolStripMenuItem.Enabled = _selectedMap.BankInfos.Any();
+                restoreBackupToolStripMenuItem.Enabled = (cmbBankFile.SelectedItem != null);
             }
         }
 
@@ -312,6 +348,237 @@ namespace StarBank
             }
         }
 
+        private void BackupBanksToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string banksFolder = _bankInfoLoader.BanksFolder;
+            string[] bankFiles = _bankInfoLoader.GetAllBankFiles();
+            if(bankFiles.Length == 0)
+            {
+                MessageBox.Show("No bank files were found in:\n" + banksFolder, "Nothing to back up",
+                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            BackUpBankFiles(bankFiles, BankBackupManager.CATEGORY_ALL_BANKS, "all bank files");
+        }
+
+        /// <summary>
+        /// Backs up the given bank files and tells the user where they went
+        /// </summary>
+        private void BackUpBankFiles(ICollection<string> bankFiles, string category, string description)
+        {
+            string backupFolder;
+            try
+            {
+                backupFolder = _bankBackupManager.BackupBankFiles(bankFiles, category);
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show("Backing up the bank files failed:\n" + exception.Message, "Backup failed",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            RefreshListBoxKeepingSelection();
+
+            DialogResult result = MessageBox.Show("Backed up " + bankFiles.Count + " bank file(s) of " + description + " to:\n" + backupFolder
+                                                  + "\n\nYou can restore a bank with the \"Restore bank\" button below the bank editor."
+                                                  + "\n\nOpen the backup folder now?",
+                                                  "Backup complete", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if(result == DialogResult.Yes)
+            {
+                Process.Start("explorer.exe", "\"" + backupFolder + "\"");
+            }
+        }
+
+        #region Map backups
+        private void backupMap_Click(object sender, EventArgs e)
+        {
+            if(_selectedMap == null || !_selectedMap.BankInfos.Any())
+                return;
+
+            //Back up the map's banks of every account, not only the selected one
+            List<string> bankFiles = _selectedMap.BankInfos.Select(o => o.BankPath).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            BackUpBankFiles(bankFiles, BankBackupManager.GetMapCategory(_selectedMap.Name), "\"" + _selectedMap.Name + "\"");
+        }
+
+        /// <summary>
+        /// Re-signs the bank selected in the bank dropdown, eg. after it was edited outside of StarBank
+        /// </summary>
+        private void btnResignBank_Click(object sender, EventArgs e)
+        {
+            BankInfo bankInfo = cmbBankFile.SelectedItem as BankInfo;
+            if(bankInfo == null)
+                return;
+
+            try
+            {
+                //Re-signing overwrites the bank, so back it up first (unless an identical backup already exists)
+                if(!_bankBackupManager.IsLatestBackupUpToDate(bankInfo.BankPath))
+                    _bankBackupManager.BackupBankFiles(new[] {bankInfo.BankPath}, BankBackupManager.CATEGORY_AUTOMATIC);
+
+                //Writing the bank back automatically re-signs it
+                Bank bank = new BankReader().LoadBankFromPath(bankInfo);
+                new BankWriter().WriteBank(bank, bankInfo.BankPath);
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show("Re-signing the bank failed:\n" + exception.Message, "Re-sign failed",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            //Reload the re-signed bank into the editor
+            _selectedMapBank = null;
+            RefreshBankListView();
+            RefreshListBoxKeepingSelection();
+
+            MessageBox.Show("The bank \"" + bankInfo.Name + "\" has been re-signed."
+                            + "\n\nThe bank as it was before re-signing is backed up and can be restored with the \"Restore bank\" button.",
+                            "Bank re-signed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnRestoreBackup_Click(object sender, EventArgs e)
+        {
+            PopulateRestoreMenu(restoreBackupContextMenuStrip.Items);
+            restoreBackupContextMenuStrip.Show(btnRestoreBackup, new Point(0, btnRestoreBackup.Height));
+        }
+
+        private void restoreBackupToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
+        {
+            PopulateRestoreMenu(restoreBackupToolStripMenuItem.DropDownItems);
+        }
+
+        /// <summary>
+        /// Fills the menu with all backups of the selected bank, newest first
+        /// </summary>
+        private void PopulateRestoreMenu(ToolStripItemCollection items)
+        {
+            items.Clear();
+            BankInfo bankInfo = cmbBankFile.SelectedItem as BankInfo;
+            IList<BankBackup> backups = (bankInfo != null ? _bankBackupManager.GetBackups(bankInfo.BankPath) : new List<BankBackup>());
+            if(backups.Count == 0)
+            {
+                items.Add(new ToolStripMenuItem("(no backups of this bank)") {Enabled = false});
+                return;
+            }
+
+            ToolStripMenuItem header = new ToolStripMenuItem("Restore \"" + bankInfo.Name + "\" from:") {Enabled = false};
+            items.Add(header);
+            foreach(BankBackup backup in backups)
+            {
+                string text = backup.DateCreated.ToString("g") + "   -   " + (backup.Category.Length > 0 ? backup.Category : "Backup");
+                if(_bankBackupManager.IsSameAsCurrent(backup, bankInfo.BankPath))
+                    text += "   (same as current)";
+                ToolStripMenuItem item = new ToolStripMenuItem(text);
+                item.Tag = backup;
+                item.Click += restoreBackupItem_Click;
+                items.Add(item);
+            }
+        }
+
+        private void restoreBackupItem_Click(object sender, EventArgs e)
+        {
+            BankBackup backup = (BankBackup) ((ToolStripMenuItem) sender).Tag;
+            BankInfo bankInfo = cmbBankFile.SelectedItem as BankInfo;
+            if(bankInfo == null)
+                return;
+
+            DialogResult result = MessageBox.Show("Restore the bank \"" + bankInfo.Name + "\" from the backup made on "
+                                                  + backup.DateCreated.ToString("g") + "?"
+                                                  + "\n\nThe current bank will be backed up first (Backups\\" + BankBackupManager.CATEGORY_BEFORE_RESTORE + "),"
+                                                  + " so this can be undone."
+                                                  + "\n\nMake sure StarCraft II is not running, otherwise it may overwrite the restored bank.",
+                                                  "Restore bank", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if(result != DialogResult.Yes)
+                return;
+
+            try
+            {
+                _bankBackupManager.RestoreBackup(backup, bankInfo.BankPath);
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show("Restoring the bank failed:\n" + exception.Message, "Restore failed",
+                                MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            //Reload the restored bank into the editor
+            _selectedMapBank = null;
+            RefreshBankListView();
+            RefreshListBoxKeepingSelection();
+        }
+
+        /// <summary>
+        /// Before StarBank overwrites a bank for the first time this session, back it up
+        /// (unless an identical backup already exists)
+        /// </summary>
+        private void bankEditor1_BankSaving(Bank bank)
+        {
+            string bankPath = bank.BankInfo.BankPath;
+            if(!_automaticallyBackedUpBanks.Add(bankPath))
+                return;
+
+            try
+            {
+                if(!_bankBackupManager.IsLatestBackupUpToDate(bankPath))
+                {
+                    _bankBackupManager.BackupBankFiles(new[] {bankPath}, BankBackupManager.CATEGORY_AUTOMATIC);
+
+                    //The map may have lost its "[!]" no-backup marker; update the list once the edit has finished
+                    BeginInvoke(new Action(RefreshListBoxKeepingSelection));
+                }
+            }
+            catch(Exception exception)
+            {
+                MessageBox.Show("Could not back up the bank before saving your change:\n" + exception.Message,
+                                "Automatic backup failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        /// <summary>
+        /// Shows whether the selected bank (and the other banks of the selected map) have been backed up
+        /// </summary>
+        private void RefreshBackupStatus()
+        {
+            BankInfo selectedBank = (_selectedMap != null ? cmbBankFile.SelectedItem as BankInfo : null);
+            btnBackupMap.Enabled = (_selectedMap != null && _selectedMap.BankInfos.Any());
+            btnRestoreBackup.Enabled = (selectedBank != null);
+            btnResignBank.Enabled = (selectedBank != null);
+
+            if(selectedBank == null)
+            {
+                lblBackupStatus.ForeColor = SystemColors.GrayText;
+                lblBackupStatus.Text = (_selectedMap != null ? "This map has no bank files to back up." : "");
+                return;
+            }
+
+            IList<BankBackup> backups = _bankBackupManager.GetBackups(selectedBank.BankPath);
+            string status;
+            if(backups.Count == 0)
+            {
+                lblBackupStatus.ForeColor = Color.Firebrick;
+                status = "Backup: none yet!";
+            }
+            else
+            {
+                bool isUpToDate = _bankBackupManager.IsSameAsCurrent(backups[0], selectedBank.BankPath);
+                lblBackupStatus.ForeColor = (isUpToDate ? Color.DarkGreen : Color.DarkOrange);
+                status = "Backup: " + backups.Count + "x, latest " + backups[0].DateCreated.ToString("g")
+                         + (isUpToDate ? " (up to date)" : " (bank changed since)");
+            }
+
+            List<BankInfo> mapBanks = GetApplicableBankInfos(_selectedMap).ToList();
+            int numBanksWithoutBackup = mapBanks.Count(o => !_bankBackupManager.HasBackup(o.BankPath));
+            if(mapBanks.Count > 1 && numBanksWithoutBackup > 0)
+            {
+                status += "\n" + numBanksWithoutBackup + " of " + mapBanks.Count + " banks of this map have no backup";
+                lblBackupStatus.ForeColor = Color.Firebrick;
+            }
+            lblBackupStatus.Text = status;
+        }
+        #endregion
+
         private void PopulateAccountMenu()
         {
             foreach (string accountNumber in _bankInfoLoader.GetAccountNumbers().OrderBy(o => o))
@@ -369,6 +636,10 @@ namespace StarBank
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
+            //Loading the caches is heavy on CPU and disk; run it below normal priority so the rest of the system stays responsive
+            Process currentProcess = Process.GetCurrentProcess();
+            ProcessPriorityClass originalPriority = currentProcess.PriorityClass;
+            currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
             try
             {
                 _isBankCacheLoaded = false;
@@ -388,13 +659,18 @@ namespace StarBank
                         "An error occurred", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }));
             }
+            finally
+            {
+                currentProcess.PriorityClass = originalPriority;
+            }
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (_mapList.Any())
+            if (_mapList != null && _mapList.Any())
             {
                 RefreshListBox();
+                RefreshBackupStatus();
                 splitContainer1.Visible = true;  
             }
             else

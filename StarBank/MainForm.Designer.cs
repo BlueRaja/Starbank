@@ -43,6 +43,15 @@
             this.openMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openMapFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveMapAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.backupSeparatorToolStripMenuItem = new System.Windows.Forms.ToolStripSeparator();
+            this.backupMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restoreBackupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restoreBackupPlaceholderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblBackupStatus = new System.Windows.Forms.Label();
+            this.btnBackupMap = new System.Windows.Forms.Button();
+            this.btnResignBank = new System.Windows.Forms.Button();
+            this.btnRestoreBackup = new System.Windows.Forms.Button();
+            this.restoreBackupContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.lblMapName = new System.Windows.Forms.Label();
             this.lblAuthor = new System.Windows.Forms.Label();
             this.lblLastUpdate = new System.Windows.Forms.Label();
@@ -56,6 +65,7 @@
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.UnprotectMapFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ResignExternalBankToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.BackupBanksToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -96,10 +106,46 @@
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.bankFileToolStripMenuItem,
             this.triggerToolStripMenuItem,
-            this.mapFileToolStripMenuItem});
+            this.mapFileToolStripMenuItem,
+            this.backupSeparatorToolStripMenuItem,
+            this.backupMapToolStripMenuItem,
+            this.restoreBackupToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(169, 92);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(222, 142);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            // 
+            // backupSeparatorToolStripMenuItem
+            // 
+            this.backupSeparatorToolStripMenuItem.Name = "backupSeparatorToolStripMenuItem";
+            this.backupSeparatorToolStripMenuItem.Size = new System.Drawing.Size(218, 6);
+            // 
+            // backupMapToolStripMenuItem
+            // 
+            this.backupMapToolStripMenuItem.Name = "backupMapToolStripMenuItem";
+            this.backupMapToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.backupMapToolStripMenuItem.Text = "Back &up this map\'s banks";
+            this.backupMapToolStripMenuItem.Click += new System.EventHandler(this.backupMap_Click);
+            // 
+            // restoreBackupToolStripMenuItem
+            // 
+            this.restoreBackupToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.restoreBackupPlaceholderToolStripMenuItem});
+            this.restoreBackupToolStripMenuItem.Name = "restoreBackupToolStripMenuItem";
+            this.restoreBackupToolStripMenuItem.Size = new System.Drawing.Size(221, 22);
+            this.restoreBackupToolStripMenuItem.Text = "&Restore bank from backup";
+            this.restoreBackupToolStripMenuItem.DropDownOpening += new System.EventHandler(this.restoreBackupToolStripMenuItem_DropDownOpening);
+            // 
+            // restoreBackupPlaceholderToolStripMenuItem
+            // 
+            this.restoreBackupPlaceholderToolStripMenuItem.Enabled = false;
+            this.restoreBackupPlaceholderToolStripMenuItem.Name = "restoreBackupPlaceholderToolStripMenuItem";
+            this.restoreBackupPlaceholderToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.restoreBackupPlaceholderToolStripMenuItem.Text = "(no backups)";
+            // 
+            // restoreBackupContextMenuStrip
+            // 
+            this.restoreBackupContextMenuStrip.Name = "restoreBackupContextMenuStrip";
+            this.restoreBackupContextMenuStrip.Size = new System.Drawing.Size(61, 4);
             // 
             // bankFileToolStripMenuItem
             // 
@@ -283,7 +329,8 @@
             // 
             this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.UnprotectMapFileToolStripMenuItem,
-            this.ResignExternalBankToolStripMenuItem});
+            this.ResignExternalBankToolStripMenuItem,
+            this.BackupBanksToolStripMenuItem});
             this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
             this.toolsToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.toolsToolStripMenuItem.Text = "&Tools";
@@ -301,6 +348,13 @@
             this.ResignExternalBankToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
             this.ResignExternalBankToolStripMenuItem.Text = "&Re-sign external bank";
             this.ResignExternalBankToolStripMenuItem.Click += new System.EventHandler(this.ResignExternalBankToolStripMenuItem_Click);
+            // 
+            // BackupBanksToolStripMenuItem
+            // 
+            this.BackupBanksToolStripMenuItem.Name = "BackupBanksToolStripMenuItem";
+            this.BackupBanksToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
+            this.BackupBanksToolStripMenuItem.Text = "&Back up all bank files";
+            this.BackupBanksToolStripMenuItem.Click += new System.EventHandler(this.BackupBanksToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 
@@ -362,8 +416,54 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.bankEditor1.Location = new System.Drawing.Point(17, 112);
             this.bankEditor1.Name = "bankEditor1";
-            this.bankEditor1.Size = new System.Drawing.Size(553, 323);
+            this.bankEditor1.Size = new System.Drawing.Size(553, 281);
             this.bankEditor1.TabIndex = 8;
+            // 
+            // lblBackupStatus
+            // 
+            this.lblBackupStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblBackupStatus.AutoEllipsis = true;
+            this.lblBackupStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblBackupStatus.Location = new System.Drawing.Point(14, 397);
+            this.lblBackupStatus.Name = "lblBackupStatus";
+            this.lblBackupStatus.Size = new System.Drawing.Size(264, 43);
+            this.lblBackupStatus.TabIndex = 13;
+            this.lblBackupStatus.Text = "Backup:";
+            this.lblBackupStatus.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btnResignBank
+            // 
+            this.btnResignBank.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnResignBank.Location = new System.Drawing.Point(284, 413);
+            this.btnResignBank.Name = "btnResignBank";
+            this.btnResignBank.Size = new System.Drawing.Size(72, 24);
+            this.btnResignBank.TabIndex = 16;
+            this.btnResignBank.Text = "Re-sign";
+            this.btnResignBank.UseVisualStyleBackColor = true;
+            this.btnResignBank.Click += new System.EventHandler(this.btnResignBank_Click);
+            // 
+            // btnBackupMap
+            // 
+            this.btnBackupMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBackupMap.Location = new System.Drawing.Point(362, 413);
+            this.btnBackupMap.Name = "btnBackupMap";
+            this.btnBackupMap.Size = new System.Drawing.Size(100, 24);
+            this.btnBackupMap.TabIndex = 14;
+            this.btnBackupMap.Text = "Back up map";
+            this.btnBackupMap.UseVisualStyleBackColor = true;
+            this.btnBackupMap.Click += new System.EventHandler(this.backupMap_Click);
+            // 
+            // btnRestoreBackup
+            // 
+            this.btnRestoreBackup.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnRestoreBackup.Location = new System.Drawing.Point(470, 413);
+            this.btnRestoreBackup.Name = "btnRestoreBackup";
+            this.btnRestoreBackup.Size = new System.Drawing.Size(100, 24);
+            this.btnRestoreBackup.TabIndex = 15;
+            this.btnRestoreBackup.Text = "Restore bank ▾";
+            this.btnRestoreBackup.UseVisualStyleBackColor = true;
+            this.btnRestoreBackup.Click += new System.EventHandler(this.btnRestoreBackup_Click);
             // 
             // splitContainer1
             // 
@@ -387,6 +487,10 @@
             this.splitContainer1.Panel2.Controls.Add(this.lblLastUpdate);
             this.splitContainer1.Panel2.Controls.Add(this.bankEditor1);
             this.splitContainer1.Panel2.Controls.Add(this.lblAuthor);
+            this.splitContainer1.Panel2.Controls.Add(this.lblBackupStatus);
+            this.splitContainer1.Panel2.Controls.Add(this.btnResignBank);
+            this.splitContainer1.Panel2.Controls.Add(this.btnBackupMap);
+            this.splitContainer1.Panel2.Controls.Add(this.btnRestoreBackup);
             this.splitContainer1.Size = new System.Drawing.Size(828, 446);
             this.splitContainer1.SplitterDistance = 231;
             this.splitContainer1.TabIndex = 12;
@@ -462,6 +566,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem UnprotectMapFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ResignExternalBankToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem BackupBanksToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
@@ -477,6 +582,15 @@
         private System.Windows.Forms.ToolStripMenuItem triggerToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem openGalaxyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem saveGalaxyToToolStripMenuItem;
+        private System.Windows.Forms.ToolStripSeparator backupSeparatorToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem backupMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem restoreBackupToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem restoreBackupPlaceholderToolStripMenuItem;
+        private System.Windows.Forms.Label lblBackupStatus;
+        private System.Windows.Forms.Button btnBackupMap;
+        private System.Windows.Forms.Button btnResignBank;
+        private System.Windows.Forms.Button btnRestoreBackup;
+        private System.Windows.Forms.ContextMenuStrip restoreBackupContextMenuStrip;
 
     }
 }

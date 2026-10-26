@@ -36,23 +36,33 @@ namespace StarBank.Bank_Stuffs
 
         private XElement CreateSection(Bank.Section section)
         {
-            return new XElement("Section", new XAttribute("name", section.Name), CreateKeys(section.Keys));
+            return new XElement("Section", new XAttribute("name", section.Name), CreateKeys(section));
         }
 
-        private XElement[] CreateKeys(IEnumerable<Bank.Key> keys)
+        private XElement[] CreateKeys(Bank.Section section)
         {
             IList<XElement> keyElements = new List<XElement>();
-            foreach(Bank.Key key in keys)
+            foreach(List<Bank.Key> keyGroup in Bank.GroupKeys(section))
             {
-                keyElements.Add(CreateKey(key));
+                keyElements.Add(CreateKey(keyGroup));
             }
             return keyElements.ToArray();
         }
 
-        private XElement CreateKey(Bank.Key key)
+        /// <summary>
+        /// Creates a single &lt;Key&gt; element containing the values of all the given keys (which share the same name)
+        /// </summary>
+        private XElement CreateKey(List<Bank.Key> keyGroup)
         {
-            return new XElement("Key", new XAttribute("name", key.Name),
-                                new XElement("Value", new XAttribute(key.Type, key.Value)));
+            XElement keyElement = new XElement("Key", new XAttribute("name", keyGroup[0].Name));
+            foreach(Bank.Key key in keyGroup.Where(o => o.ValueName != null))
+            {
+                XElement valueElement = new XElement(key.ValueName);
+                if(!String.IsNullOrEmpty(key.Type))
+                    valueElement.Add(new XAttribute(key.Type, key.Value ?? ""));
+                keyElement.Add(valueElement);
+            }
+            return keyElement;
         }
 
         private XElement CreateSignature(Bank bank)

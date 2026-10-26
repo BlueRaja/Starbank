@@ -21,13 +21,17 @@ namespace StarBank.Bank_Stuffs
             {
                 inputString.Append(section.Name);
                 
-                //And between those, each key-name/value
-                foreach(Bank.Key key in section.Keys.OrderBy(o => o.Name, StringComparer.Ordinal))
+                //And between those, each key-name followed by its values (also ordered by ASCII values of the value names)
+                foreach(List<Bank.Key> keyGroup in Bank.GroupKeys(section).OrderBy(o => o[0].Name, StringComparer.Ordinal))
                 {
-                    inputString.Append(key.Name);
-                    inputString.Append("Value");
-                    inputString.Append(key.Type);
-                    inputString.Append(key.Value);
+                    inputString.Append(keyGroup[0].Name);
+                    foreach(Bank.Key key in keyGroup.Where(o => o.ValueName != null)
+                                                    .OrderBy(o => o.ValueName, StringComparer.Ordinal))
+                    {
+                        inputString.Append(key.ValueName);
+                        inputString.Append(key.Type);
+                        inputString.Append(key.Value);
+                    }
                 }
             }
 

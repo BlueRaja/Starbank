@@ -38,9 +38,15 @@ namespace StarBank.Bank_Stuffs
             return bankInfo;
         }
 
+        /// <summary>
+        /// Read-only lookup.  This is called from multiple threads at once while loading maps,
+        /// so it must never modify the (non-thread-safe) dictionaries
+        /// </summary>
         public BankInfo GetBankInfoForPlayer(string playerNumber, string bankName)
         {
-            var bankCache = GetOrAddBankCache(playerNumber);
+            Dictionary<string, BankInfo> bankCache;
+            if(!_bankCaches.TryGetValue(playerNumber, out bankCache))
+                return null;
             string fileName = Path.GetFileNameWithoutExtension(bankName).ToLower();
 
             BankInfo bankInfo;

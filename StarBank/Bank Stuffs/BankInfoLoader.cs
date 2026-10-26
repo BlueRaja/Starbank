@@ -13,6 +13,24 @@ namespace StarBank.Bank_Stuffs
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),
                 @"StarCraft II\Accounts");
 
+        /// <summary>
+        /// The folder that contains every account's bank files
+        /// </summary>
+        public string BanksFolder
+        {
+            get { return BANKS_FOLDER; }
+        }
+
+        /// <summary>
+        /// Returns the paths of all bank files of all accounts
+        /// </summary>
+        public string[] GetAllBankFiles()
+        {
+            if(!Directory.Exists(BANKS_FOLDER))
+                return new string[0];
+            return Directory.GetFiles(BANKS_FOLDER, "*.SC2Bank", SearchOption.AllDirectories);
+        }
+
         //Regex to look for the string BankLoad("something") - the "something" is what we're looking for
         //(the name of the bank)
         private readonly Regex BANK_LOAD_REGEX = new Regex(@"BankLoad\(""(.+?)""",
@@ -22,6 +40,13 @@ namespace StarBank.Bank_Stuffs
             RegexOptions.Singleline | RegexOptions.Compiled);
 
         private readonly BankInfoCache _bankCache = new BankInfoCache();
+
+        private readonly Lazy<IEnumerable<string>> _accountNumbers;
+
+        public BankInfoLoader()
+        {
+            _accountNumbers = new Lazy<IEnumerable<string>>(GetAccountNumbers);
+        }
 
         //For progress bars
         public event EventHandler<ProgressChangedEventArgs> ProgressChanged;
@@ -70,8 +95,16 @@ namespace StarBank.Bank_Stuffs
         {
             //We guess the bank name by finding all references to BankLoad()
             //Then we search for that bank file in the bank folders
-            IEnumerable<string> bankNames = GetBankNamesFromCode(galaxyScriptCode).ToList();
-            IEnumerable<string> accountNumbers = GetAccountNumbers();
+            return GetBanksFromBankNames(GetBankNamesFromCode(galaxyScriptCode));
+        }
+
+        /// <summary>
+        /// Given bank names found by GetBankNamesFromCode(), returns references to the BankInfos
+        /// of all the matching bank files of every account
+        /// </summary>
+        public IEnumerable<BankInfo> GetBanksFromBankNames(IEnumerable<string> bankNames)
+        {
+            IEnumerable<string> accountNumbers = GetCachedAccountNumbers();
 
             return (from accountNumber in accountNumbers
                 from bankName in bankNames
@@ -83,7 +116,7 @@ namespace StarBank.Bank_Stuffs
         /// <summary>
         /// Given the galaxyscript code, returns a list of possible banknames used by it
         /// </summary>
-        private IEnumerable<string> GetBankNamesFromCode(string galaxyScriptCode)
+        public List<string> GetBankNamesFromCode(string galaxyScriptCode)
         {
             List<string> bankNames = new List<string>();
 
@@ -99,11 +132,17 @@ namespace StarBank.Bank_Stuffs
 
             //A bit more difficult:  some maps use a variable instead of hard-coding the bank-name directly in the function.
             //I'm not going to write a parser o_O but we can take care of the 90% case by simply searching for the string 'variableName = "whatever"'
+            //The same variable is often passed to BankLoad() many times; only search the (potentially huge) script once per variable
             matches = BANK_LOAD_VARIABLE_REGEX.Matches(galaxyScriptCode);
+            HashSet<string> variableNames = new HashSet<string>();
             foreach(Match match in matches)
             {
-                string variableName = Regex.Escape(match.Groups[1].Value.Trim());
-                Regex variableRegex = new Regex(@"\s*" + variableName + @"\s*=\s*""([a-zA-Z1-9_ ]+?)""");
+                variableNames.Add(match.Groups[1].Value.Trim());
+            }
+
+            foreach(string variableName in variableNames)
+            {
+                Regex variableRegex = new Regex(Regex.Escape(variableName) + @"\s*=\s*""([a-zA-Z1-9_ ]+?)""");
                 MatchCollection variableMatches = variableRegex.Matches(galaxyScriptCode);
                 foreach(Match variableMatch in variableMatches)
                 {
@@ -129,7 +168,16 @@ namespace StarBank.Bank_Stuffs
             return bankFolder.EnumerateDirectories()
                     .SelectMany(o => o.EnumerateDirectories())
                     .Select(s => s.Name)
-                    .Where(BankPathParser.IsValidPlayerOrAuthorNumber);
+                    .Where(BankPathParser.IsValidPlayerOrAuthorNumber)
+                    .ToList();
+        }
+
+        /// <summary>
+        /// Same as GetAccountNumbers(), but only scans the disk once instead of once per map
+        /// </summary>
+        private IEnumerable<string> GetCachedAccountNumbers()
+        {
+            return _accountNumbers.Value;
         }
     }
 }

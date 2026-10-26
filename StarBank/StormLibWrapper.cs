@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -183,17 +184,24 @@ namespace StarBank
             /// </summary>
             public string ReadFile()
             {
-                const int bytesToReadAtOnce = 3000;
-                List<string> stringsRead = new List<string>();
-                string lastStringRead;
-                do
-                {
-                    lastStringRead = ReadString(bytesToReadAtOnce);
-                    stringsRead.Add(lastStringRead);
-                } while (lastStringRead.Length == bytesToReadAtOnce);
+                if(_handle == IntPtr.Zero)
+                    return "";
 
-                //Combine all the individually-read strings into one string
-                return String.Join("", stringsRead);
+                //Read raw bytes and decode once at the end; decoding each chunk separately breaks
+                //multi-byte UTF-8 characters, and comparing the decoded string length against the
+                //byte count stopped reading early whenever a chunk contained non-ASCII text
+                const int bytesToReadAtOnce = 64*1024;
+                using(MemoryStream stream = new MemoryStream())
+                {
+                    byte[] lastBytesRead;
+                    do
+                    {
+                        lastBytesRead = Read(bytesToReadAtOnce);
+                        stream.Write(lastBytesRead, 0, lastBytesRead.Length);
+                    } while(lastBytesRead.Length == bytesToReadAtOnce);
+
+                    return Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int) stream.Length);
+                }
             }
         }
     }

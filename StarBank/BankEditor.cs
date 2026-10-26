@@ -47,6 +47,10 @@ namespace StarBank
             InitializeComponent();
             this.columnName.GroupKeyGetter = GroupKeyGetter;
             this.columnName.GroupKeyToTitleConverter = GroupKeyToTitleConverter;
+
+            //Keys with several named values show each value as "Key.ValueName"
+            this.columnName.AspectGetter = row => ((Bank.Key) row).DisplayName;
+            this.columnName.AspectPutter = (row, value) => ((Bank.Key) row).Name = (string) value;
         }
 
         private object GroupKeyGetter(object rowobject)
@@ -61,16 +65,45 @@ namespace StarBank
             return section.Name;
         }
 
+        /// <summary>
+        /// Raised right before an edited bank overwrites its bank file (eg. to back it up first)
+        /// </summary>
+        public event Action<Bank> BankSaving;
+
+        /// <summary>
+        /// Raised after an edited bank has been written to its bank file
+        /// </summary>
+        public event Action<Bank> BankSaved;
+
         private void SaveBank()
         {
+            if(BankSaving != null)
+                BankSaving(_bank);
+
             BankWriter writer = new BankWriter();
             writer.WriteBank(_bank, _bank.BankInfo.BankPath);
+
+            if(BankSaved != null)
+                BankSaved(_bank);
         }
 
         #region Checkbox for type column
         //Most of the code is taken almost verbatim from the ObjectListView example
         private void objectListView1_CellEditStarting(object sender, BrightIdeasSoftware.CellEditEventArgs e)
         {
+            Bank.Key editedKey = (Bank.Key) e.RowObject;
+
+            //Renaming one value of a key with several named values would split it from the others
+            if(e.Column == columnName && editedKey.IsNamedValue)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            //A key without any value gets a normal "Value" once it is given one
+            if(e.Column != columnName && editedKey.ValueName == null)
+                editedKey.ValueName = Bank.Key.DEFAULT_VALUE_NAME;
+
             if(e.Column != columnType)
                 return;
 

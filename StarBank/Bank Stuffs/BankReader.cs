@@ -47,18 +47,24 @@ namespace StarBank.Bank_Stuffs
                 //Add keys
                 foreach(var keyNode in sectionNode.Descendants("Key"))
                 {
-                    Bank.Key key = new Bank.Key();
-                    key.Section = section;
-                    section.Keys.Add(key);
-
                     nameAttribute = keyNode.Attribute("name");
-                    if(nameAttribute != null)
-                        key.Name = nameAttribute.Value;
+                    string keyName = (nameAttribute != null ? nameAttribute.Value : null);
 
-                    //Key type/value are stored in the attributes of a single child "Value" node
-                    var valueNode = keyNode.Descendants("Value").FirstOrDefault();
-                    if(valueNode != null)
+                    //Key type/value are stored in the attributes of the child nodes - usually a single "Value" node,
+                    //but some maps store several differently-named values in one key.  Each value becomes its own Key object.
+                    object keyGroup = new object();
+                    List<XElement> valueNodes = keyNode.Elements().ToList();
+                    if(valueNodes.Count == 0)
                     {
+                        section.Keys.Add(new Bank.Key {Name = keyName, Section = section, ValueName = null, KeyGroup = keyGroup});
+                        continue;
+                    }
+
+                    foreach(XElement valueNode in valueNodes)
+                    {
+                        Bank.Key key = new Bank.Key {Name = keyName, Section = section, ValueName = valueNode.Name.LocalName, KeyGroup = keyGroup};
+                        section.Keys.Add(key);
+
                         var valueAttribute = valueNode.Attributes().FirstOrDefault();
                         if(valueAttribute != null)
                         {

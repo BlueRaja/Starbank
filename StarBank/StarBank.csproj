@@ -73,6 +73,7 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Bank Stuffs\Bank.cs" />
+    <Compile Include="Bank Stuffs\BankBackupManager.cs" />
     <Compile Include="Bank Stuffs\BankInfo.cs" />
     <Compile Include="Bank Stuffs\BankInfoCache.cs" />
     <Compile Include="Bank Stuffs\BankInfoLoader.cs" />
@@ -92,6 +93,8 @@
     <Compile Include="NewSectionItemForm.Designer.cs">
       <DependentUpon>NewSectionItemForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MapCacheStore.cs" />
+    <Compile Include="StarBankDataFolder.cs" />
     <Compile Include="MapInfoCache.cs" />
     <Compile Include="ExplorerHelper.cs" />
     <Compile Include="MainForm.cs">
