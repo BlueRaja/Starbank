@@ -30,7 +30,7 @@ namespace StarBank.Bank_Stuffs
                     {
                         inputString.Append(key.ValueName);
                         inputString.Append(key.Type);
-                        inputString.Append(key.Value);
+                        if (key.Type != "text") inputString.Append(key.Value);
                     }
                 }
             }
