@@ -6,3 +6,4 @@
 /StarBank Setup/x86_ReleaseSetupFiles
 /StarBank Setup/StarBank Setup-cache
 *.suo
+.vs/
